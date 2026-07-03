@@ -1,0 +1,51 @@
+/* fitxa-print.css — Estils addicionals per impressió i PDF */
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  body {
+    background: white !important;
+    color: #111 !important;
+    font-size: 11pt;
+    font-family: 'Inter', Arial, sans-serif;
+  }
+
+  #topbar, #sidebar, .no-print,
+  .btn, .modal-overlay, .drop-zone,
+  .galeria, #drop-container { display: none !important; }
+
+  #app-shell {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  #main-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .page-header { display: none !important; }
+
+  #fitxa {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: #111 !important;
+    max-width: 100% !important;
+  }
+
+  #fitxa h1, #fitxa h2, #fitxa h3 { color: #003366 !important; }
+
+  /* Grid de paràmetres en blanc */
+  #fitxa [style*="background:var(--color-profund)"] {
+    background: #f5f8fb !important;
+    border: 1px solid #dde8f0 !important;
+  }
+
+  .badge { border: 1px solid #aaa !important; background: #eee !important; color: #333 !important; }
+  .estrelles { color: #f0a500 !important; }
+
+  /* Capçalera de fitxa */
+  #fitxa img { border: 2px solid #003366 !important; }
+}
