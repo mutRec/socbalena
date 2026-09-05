@@ -7,7 +7,6 @@ import { renderImmersions } from './views/immersions.js';
 import { renderImmersioDetall } from './views/immersio-detall.js';
 import { renderCentres } from './views/centres.js';
 import { renderZones } from './views/zones.js';
-import { renderEstadistiques } from './views/estadistiques.js';
 import { renderPerfil } from './views/perfil.js';
 
 // ── Estat global ────────────────────────────────────────
@@ -31,7 +30,6 @@ const RUTES = {
   '/immersio':     renderImmersioDetall,   // /immersio/:id
   '/centres':      renderCentres,
   '/zones':        renderZones,
-  '/estadistiques':renderEstadistiques,
   '/perfil':       renderPerfil,
 };
 

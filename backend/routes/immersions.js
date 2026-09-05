@@ -46,31 +46,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/immersions/estadistiques
-router.get('/estadistiques', async (req, res) => {
-  try {
-    const uid = req.usuari.id;
-    const stats = await pool.query(
-      `SELECT
-        COUNT(*) AS total_immersions,
-        SUM(temps_fons) AS total_minuts,
-        MAX(profunditat_max) AS profunditat_record,
-        AVG(profunditat_max) AS profunditat_mitja,
-        COUNT(DISTINCT zona_id) AS zones_visitades,
-        COUNT(DISTINCT EXTRACT(YEAR FROM data)) AS anys_actiu
-       FROM immersions WHERE usuari_id = $1::uuid`, [uid]
-    );
-    const perAny = await pool.query(
-      `SELECT EXTRACT(YEAR FROM data) AS "any", COUNT(*) AS total
-       FROM immersions WHERE usuari_id = $1::uuid
-       GROUP BY "any" ORDER BY "any"`, [uid]
-    );
-    res.json({ ...stats.rows[0], per_any: perAny.rows });
-  } catch (err) {
-    res.status(500).json({ error: 'Error del servidor' });
-  }
-});
-
 // GET /api/immersions/:id
 router.get('/:id', async (req, res) => {
   try {

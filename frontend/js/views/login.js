@@ -12,11 +12,6 @@ export function renderLogin(el) {
       </div>
 
       <div class="card" id="login-card">
-        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
-          <button class="btn btn-primary" id="tab-login" style="flex:1">Entrar</button>
-          <button class="btn btn-secondary" id="tab-registre" style="flex:1">Registrar-se</button>
-        </div>
-
         <div id="alert-login"></div>
 
         <!-- Formulari login -->
@@ -32,53 +27,17 @@ export function renderLogin(el) {
           <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;" id="btn-login">
             Entrar
           </button>
-          <p style="text-align:center;margin-top:1rem;font-size:0.8rem;color:#7AA3C0;">
-            Demo: <strong>admin@socbalena.cat</strong> / <strong>Demo1234!</strong>
-          </p>
-        </form>
-
-        <!-- Formulari registre (ocult) -->
-        <form id="form-registre" style="display:none">
-          <div class="form-group">
-            <label class="form-label">Nom complet</label>
-            <input class="form-input" type="text" id="reg-nom" placeholder="Maria García" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Correu electrònic</label>
-            <input class="form-input" type="email" id="reg-email" placeholder="nom@exemple.cat" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Contrasenya (mínim 8 caràcters)</label>
-            <input class="form-input" type="password" id="reg-pass" placeholder="••••••••" required minlength="8" />
-          </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">
-            Crear compte
-          </button>
         </form>
       </div>
     </div>`;
 
-  // Tabs
-  const tabLogin = el.querySelector('#tab-login');
-  const tabReg   = el.querySelector('#tab-registre');
-  const fLogin   = el.querySelector('#form-login');
-  const fReg     = el.querySelector('#form-registre');
-  const alert    = el.querySelector('#alert-login');
-
-  tabLogin.onclick = () => {
-    fLogin.style.display = ''; fReg.style.display = 'none';
-    tabLogin.className = 'btn btn-primary'; tabReg.className = 'btn btn-secondary';
-  };
-  tabReg.onclick = () => {
-    fReg.style.display = ''; fLogin.style.display = 'none';
-    tabReg.className = 'btn btn-primary'; tabLogin.className = 'btn btn-secondary';
-  };
+  const alert = el.querySelector('#alert-login');
 
   function mostrarError(msg) {
     alert.innerHTML = `<div class="alert alert-error">${msg}</div>`;
   }
 
-  fLogin.onsubmit = async (e) => {
+  el.querySelector('#form-login').onsubmit = async (e) => {
     e.preventDefault();
     alert.innerHTML = '';
     const btn = el.querySelector('#btn-login');
@@ -95,23 +54,6 @@ export function renderLogin(el) {
       mostrarError(err.message);
     } finally {
       btn.disabled = false; btn.textContent = 'Entrar';
-    }
-  };
-
-  fReg.onsubmit = async (e) => {
-    e.preventDefault();
-    alert.innerHTML = '';
-    try {
-      const { token, usuari } = await api.registre(
-        el.querySelector('#reg-nom').value,
-        el.querySelector('#reg-email').value,
-        el.querySelector('#reg-pass').value
-      );
-      store.setSession(token, usuari);
-      mostrarApp();
-      navega('/');
-    } catch (err) {
-      mostrarError(err.message);
     }
   };
 }

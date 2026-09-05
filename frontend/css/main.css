@@ -255,29 +255,6 @@ tr.clickable { cursor: pointer; }
 .badge-perill { background: rgba(255,107,107,0.15); color: var(--color-perill); }
 .badge-gris { background: var(--color-superfic); color: var(--color-gris); }
 
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.stat-card {
-  background: var(--color-mitjà);
-  border: 1px solid var(--color-superfic);
-  border-radius: var(--r-md);
-  padding: 1.25rem;
-  text-align: center;
-}
-.stat-valor {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-cian);
-  line-height: 1;
-}
-.stat-label { font-size: 0.75rem; color: var(--color-gris); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
-
 /* Valoració estrelles */
 .estrelles { color: var(--color-warn); letter-spacing: 2px; }
 
@@ -387,21 +364,6 @@ tr.clickable { cursor: pointer; }
   font-family: var(--font-display);
   font-weight: 700; color: var(--color-abiss);
   font-size: 0.9rem;
-}
-
-/* Profunditat visual (meter) */
-.profunditat-bar {
-  height: 6px;
-  background: var(--color-superfic);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 0.3rem;
-}
-.profunditat-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-cian), var(--color-ok));
-  border-radius: 3px;
-  transition: width 0.6s ease;
 }
 
 /* Alerts */

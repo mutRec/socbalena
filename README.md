@@ -1,6 +1,6 @@
 # 🐋 SócBalena — Diari de busseig personal
 
-Aplicació web fullstack per gestionar el teu historial d'immersions de busseig recreatiu. Amb fitxes imprimibles, galeria de fotos i vídeos, estadístiques i molt més.
+Aplicació web fullstack per gestionar el teu historial d'immersions de busseig recreatiu. Amb fitxes imprimibles i galeria de fotos i vídeos.
 
 ## Característiques
 
@@ -9,7 +9,6 @@ Aplicació web fullstack per gestionar el teu historial d'immersions de busseig 
 - **Galeria multimèdia**: Puja fotos i mini-vídeos per cada immersió, descarrega'ls, estableix portada
 - **Centres de busseig**: Directori de centres amb les seves zones associades
 - **Zones de busseig**: Mapa de spots amb tipus, dificultat, coordenades i descripció
-- **Estadístiques**: Gràfiques de profunditat, immersions per any/mes, zones més visitades
 - **Autenticació JWT**: Sistema multi-usuari amb sessions segures
 - **Disseny submarí**: Interfície en blau abissal amb accents cian fosforescent
 
@@ -40,8 +39,8 @@ socbalena/
 │   ├── db/pool.js            ← Connexió PostgreSQL
 │   ├── middleware/auth.js    ← JWT middleware
 │   └── routes/
-│       ├── auth.js           ← Login, registre, perfil
-│       ├── immersions.js     ← CRUD immersions + estadístiques
+│       ├── auth.js           ← Login, perfil
+│       ├── immersions.js     ← CRUD immersions
 │       ├── centres.js        ← CRUD centres
 │       ├── zones.js          ← CRUD zones
 │       └── media.js          ← Pujada/baixada fotos i vídeos
@@ -60,7 +59,6 @@ socbalena/
 │           ├── immersio-detall.js ← Fitxa + galeria
 │           ├── centres.js
 │           ├── zones.js
-│           ├── estadistiques.js
 │           └── perfil.js
 └── nginx/
     ├── Dockerfile
@@ -112,7 +110,6 @@ Espera uns 30 segons perquè PostgreSQL inicialitzi l'esquema.
 
 ```
 POST /api/auth/login        → { token, usuari }
-POST /api/auth/registre     → { token, usuari }
 GET  /api/auth/perfil       → usuari (requereix Bearer token)
 ```
 
@@ -124,7 +121,6 @@ GET    /api/immersions/:id       → detall + media
 POST   /api/immersions           → crear
 PUT    /api/immersions/:id       → editar
 DELETE /api/immersions/:id       → eliminar
-GET    /api/immersions/estadistiques → resum numèric
 ```
 
 ### Centres i zones

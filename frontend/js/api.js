@@ -30,7 +30,6 @@ async function req(method, path, body, isFormData = false) {
 export const api = {
   // Auth
   login:    (email, password) => req('POST', '/auth/login', { email, password }),
-  registre: (nom, email, password) => req('POST', '/auth/registre', { nom, email, password }),
   perfil:   () => req('GET', '/auth/perfil'),
 
   // Immersions
@@ -40,7 +39,6 @@ export const api = {
     crear:    (dades)       => req('POST', '/immersions', dades),
     editar:   (id, dades)   => req('PUT', `/immersions/${id}`, dades),
     eliminar: (id)          => req('DELETE', `/immersions/${id}`),
-    estadis:  ()            => req('GET', '/immersions/estadistiques'),
   },
 
   // Centres

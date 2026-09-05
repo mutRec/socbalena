@@ -3,50 +3,16 @@ import { api } from '../api.js';
 import { store } from '../app.js';
 
 export async function renderInici(el) {
-  const [estadis, darreresRes] = await Promise.all([
-    api.immersions.estadis(),
-    api.immersions.llista({ limit: 5 })
-  ]);
-  const e = estadis;
+  const darreresRes = await api.immersions.llista({ limit: 5 });
   const darreres = darreresRes.immersions;
-
-  const hores = e.total_minuts ? Math.floor(e.total_minuts / 60) : 0;
-  const minuts = e.total_minuts ? Math.round(e.total_minuts % 60) : 0;
 
   el.innerHTML = `
     <div class="page-header">
       <div class="page-title">
         <h1>Benvingut/da, ${store.usuari?.nom?.split(' ')[0] || ''}! 🤿</h1>
-        <p class="page-subtitle">Resum del teu diari de busseig</p>
+        <p class="page-subtitle">El teu diari de busseig</p>
       </div>
       <a href="#/immersions/nova" class="btn btn-primary" id="btn-nova-imm">+ Nova immersió</a>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-valor">${e.total_immersions || 0}</div>
-        <div class="stat-label">Immersions</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-valor">${hores}h ${minuts}m</div>
-        <div class="stat-label">Temps fons</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-valor">${e.profunditat_record ? e.profunditat_record + 'm' : '—'}</div>
-        <div class="stat-label">Màxima profunditat</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-valor">${e.zones_visitades || 0}</div>
-        <div class="stat-label">Zones visitades</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-valor">${e.profunditat_mitja ? parseFloat(e.profunditat_mitja).toFixed(1) + 'm' : '—'}</div>
-        <div class="stat-label">Prof. mitjana</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-valor">${e.anys_actiu || 0}</div>
-        <div class="stat-label">Anys actiu</div>
-      </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem;" class="dashboard-grid">
@@ -86,9 +52,6 @@ export async function renderInici(el) {
           </a>
           <a href="#/zones" class="btn btn-secondary" style="justify-content:flex-start;gap:1rem">
             <span>🗺️</span> Gestionar zones
-          </a>
-          <a href="#/estadistiques" class="btn btn-secondary" style="justify-content:flex-start;gap:1rem">
-            <span>📊</span> Estadístiques completes
           </a>
         </div>
       </div>

@@ -35,34 +35,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/registre
-router.post('/registre', async (req, res) => {
-  const { nom, email, password } = req.body;
-  if (!nom || !email || !password) return res.status(400).json({ error: 'Tots els camps són obligatoris' });
-  if (password.length < 8) return res.status(400).json({ error: 'La contrasenya ha de tenir mínim 8 caràcters' });
-
-  try {
-    const existent = await pool.query('SELECT id FROM usuaris WHERE email = $1', [email.toLowerCase()]);
-    if (existent.rows.length) return res.status(409).json({ error: 'Aquest email ja està registrat' });
-
-    const hash = await bcrypt.hash(password, 10);
-    const { rows } = await pool.query(
-      'INSERT INTO usuaris (nom, email, password_hash) VALUES ($1, $2, $3) RETURNING id, nom, email, rol',
-      [nom.trim(), email.toLowerCase(), hash]
-    );
-    const usuari = rows[0];
-    const token = jwt.sign(
-      { id: usuari.id, nom: usuari.nom, email: usuari.email, rol: usuari.rol },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    res.status(201).json({ token, usuari });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error del servidor' });
-  }
-});
-
 // GET /api/auth/perfil
 router.get('/perfil', authMiddleware, async (req, res) => {
   try {
