@@ -183,7 +183,7 @@ export async function renderImmersions(el) {
                 <input class="form-input" type="number" name="pressio_sortida" value="${imm?.pressio_sortida || ''}" />
               </div>
               <div class="form-group">
-                <label class="form-label">Capacitat bombona (L)</label>
+                <label class="form-label">Capacitat ampolla (L)</label>
                 <input class="form-input" type="number" name="capacitat_bombona" value="${imm?.capacitat_bombona || ''}" />
               </div>
             </div>
