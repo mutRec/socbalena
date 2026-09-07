@@ -129,6 +129,10 @@ export async function renderImmersions(el) {
             <h3 style="color:var(--color-cian);margin-bottom:1rem;border-bottom:1px solid var(--color-superfic);padding-bottom:0.5rem">📅 Dades generals</h3>
             <div class="form-row-3">
               <div class="form-group">
+                <label class="form-label">Nº immersió</label>
+                <input class="form-input" type="number" name="numero_immersio" value="${imm?.numero_immersio || ''}" placeholder="Auto" min="1" />
+              </div>
+              <div class="form-group">
                 <label class="form-label">Data *</label>
                 <input class="form-input" type="date" name="data" value="${imm?.data?.slice(0,10) || avui()}" required />
               </div>
@@ -136,12 +140,12 @@ export async function renderImmersions(el) {
                 <label class="form-label">Hora entrada</label>
                 <input class="form-input" type="time" name="hora_entrada" value="${imm?.hora_entrada?.slice(0,5) || ''}" />
               </div>
+            </div>
+            <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Hora sortida</label>
                 <input class="form-input" type="time" name="hora_sortida" value="${imm?.hora_sortida?.slice(0,5) || ''}" />
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Centre</label>
                 <select class="form-select" name="centre_id">
