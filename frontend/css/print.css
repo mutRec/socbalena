@@ -48,4 +48,7 @@
 
   /* Capçalera de fitxa */
   #fitxa img { border: 2px solid #003366 !important; }
+
+  /* Peu de fitxa */
+  #fitxa .fitxa-peu { border-top-color: #dde8f0 !important; color: #666 !important; }
 }

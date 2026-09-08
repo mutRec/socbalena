@@ -1,0 +1,19 @@
+--fer un dump del la BBDD postgres per pujar-ho aleshores a poma i fer l'import cap a la bbdd del contenidor en producció.
+
+D:\PROJECTS\socbalena>docker exec socbalena_db pg_dump -U socbalena -d socbalena -F c > immersions_backup.dump
+
+--desde host poma, executo el pg_restore del contenidor postgressql per restaurar tota la bbdd. el clean elimina les dades de la BBDD per si no
+--estigués buida.
+❯ docker cp immersions_backup.dump socbalena_db:/tmp/immersions_backup.dump
+❯ docker exec -it socbalena_db pg_restore -U socbalena -d socbalena --clean --if-exists /tmp/immersions_backup.dump
+
+--eliminació de TOTA la bbdd per poder-la restaurar:
+
+D:\PROJECTS\socbalena>docker exec socbalena_db dropdb -U socbalena socbalena
+
+D:\PROJECTS\socbalena>docker exec socbalena_db createdb -U socbalena socbalena
+
+D:\PROJECTS\socbalena>docker cp immersions_backup.dump socbalena_db:/tmp/immersions_backup.dump
+D:\PROJECTS\socbalena>docker exec socbalena_db pg_restore -U socbalena -d socbalena /tmp/immersions_backup.dump
+
+D:\PROJECTS\socbalena>docker exec socbalena_db psql -U socbalena -d socbalena -c "SELECT id, immersio_id, nom_fitxer, nom_original FROM media LIMIT 10;"

@@ -14,14 +14,14 @@ export async function renderImmersioDetall(el, id) {
     const portada = i.media?.find(m => m.es_portada && m.tipus === 'foto');
     el.innerHTML = `
       <div class="page-header no-print">
-        <div style="display:flex;align-items:center;gap:1rem">
+        <div class="page-header-left">
           <a href="#/immersions" class="btn btn-ghost btn-sm">← Tornar</a>
           <div class="page-title">
             <h1>Immersió #${i.numero_immersio || '—'}</h1>
             <p class="page-subtitle">${formatData(i.data)} · ${i.zona_nom || 'Sense zona'}</p>
           </div>
         </div>
-        <div style="display:flex;gap:0.5rem;">
+        <div class="page-accions">
           <button class="btn btn-secondary" id="btn-imprimir">🖨️ Imprimir</button>
           <button class="btn btn-primary" id="btn-pdf">📄 PDF</button>
           <button class="btn btn-secondary" id="btn-editar">✏️ Editar</button>
@@ -30,9 +30,9 @@ export async function renderImmersioDetall(el, id) {
 
       <!-- FITXA IMPRIMIBLE -->
       <div id="fitxa" class="card" style="margin-bottom:1.5rem;">
-        <div style="display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-          ${portada ? `<img src="/uploads/${portada.nom_fitxer}" style="width:200px;height:150px;object-fit:cover;border-radius:var(--r-md);border:2px solid var(--color-cian);" />` : ''}
-          <div style="flex:1;min-width:200px;">
+        <div class="fitxa-cap">
+          ${portada ? `<img class="fitxa-portada" src="/uploads/${portada.nom_fitxer}" style="width:200px;max-width:100%;height:150px;object-fit:cover;border-radius:var(--r-md);border:2px solid var(--color-cian);" />` : ''}
+          <div class="fitxa-info">
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:2rem;color:var(--color-cian);font-weight:700;">
               🤿 Immersió #${i.numero_immersio || '—'}
             </div>
@@ -43,7 +43,7 @@ export async function renderImmersioDetall(el, id) {
               ${i.tipus_immersio ? `<span class="badge badge-cian">${i.tipus_immersio}</span>` : ''}
             </div>
           </div>
-          <div style="text-align:right;min-width:150px;">
+          <div class="fitxa-data">
             <div style="font-size:0.75rem;color:var(--color-gris);text-transform:uppercase;letter-spacing:0.05em">Data</div>
             <div style="font-size:1.1rem;font-weight:600">${formatData(i.data)}</div>
             ${i.hora_entrada ? `<div style="color:var(--color-gris);font-size:0.875rem">${i.hora_entrada?.slice(0,5)} — ${i.hora_sortida?.slice(0,5) || '?'}</div>` : ''}
@@ -51,7 +51,7 @@ export async function renderImmersioDetall(el, id) {
         </div>
 
         <!-- Grid de paràmetres -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="param-grid">
           ${paramCard('📏 Prof. màxima', i.profunditat_max ? i.profunditat_max + ' m' : '—')}
           ${paramCard('📐 Prof. mitjana', i.profunditat_mitja ? i.profunditat_mitja + ' m' : '—')}
           ${paramCard('⏱️ Temps fons', i.temps_fons ? i.temps_fons + ' min' : '—')}
@@ -70,7 +70,7 @@ export async function renderImmersioDetall(el, id) {
         </div>
 
         ${(i.company || i.instructor) ? `
-          <div style="display:flex;gap:2rem;margin-bottom:1rem;padding:0.75rem;background:var(--color-profund);border-radius:var(--r-sm);">
+          <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1rem;padding:0.75rem;background:var(--color-profund);border-radius:var(--r-sm);">
             ${i.company ? `<div><span style="color:var(--color-gris);font-size:0.8rem">Company/a:</span> <strong>${i.company}</strong></div>` : ''}
             ${i.instructor ? `<div><span style="color:var(--color-gris);font-size:0.8rem">Instructor:</span> <strong>${i.instructor}</strong></div>` : ''}
           </div>` : ''}
@@ -82,7 +82,7 @@ export async function renderImmersioDetall(el, id) {
           </div>` : ''}
 
         <!-- Peu de fitxa -->
-        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--color-superfic);display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:var(--color-gris);">
+        <div class="fitxa-peu">
           <span>🐋 SócBalena — Diari de busseig</span>
           <span>Registrat: ${formatDataHora(i.creat_a)}</span>
         </div>
@@ -90,7 +90,7 @@ export async function renderImmersioDetall(el, id) {
 
       <!-- Galeria de fotos i vídeos -->
       <div class="card no-print">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="galeria-cap">
           <h3>📸 Fotos i vídeos (${i.media?.length || 0})</h3>
           <button class="btn btn-secondary btn-sm" id="btn-pujar">+ Pujar fitxer</button>
         </div>

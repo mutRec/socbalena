@@ -17,13 +17,18 @@
 <!-- Shell principal de l'app -->
 <div id="app-shell" style="display:none">
   <header id="topbar">
-    <a href="#/" class="logo">🐋 SócBalena <span>diving log</span></a>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="btn btn-ghost btn-icon" id="btn-menu" aria-label="Obre el menú" title="Menú">☰</button>
+      <a href="#/" class="logo">🐋 SócBalena <span>diving log</span></a>
+    </div>
     <div class="user-info" id="user-menu">
       <div class="user-avatar" id="user-avatar">?</div>
       <span id="user-nom">—</span>
       <button class="btn btn-ghost btn-sm" id="btn-logout">Sortir</button>
     </div>
   </header>
+
+  <div id="sidebar-overlay" aria-hidden="true"></div>
 
   <nav id="sidebar">
     <span class="nav-section">Principal</span>

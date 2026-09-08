@@ -1,7 +1,7 @@
 // views/immersions.js
 import { api } from '../api.js';
 
-export async function renderImmersions(el) {
+export async function renderImmersions(el, id) {
   let pagina = 1;
   const limit = 20;
   let centresCache = [], zonesCache = [];
@@ -37,6 +37,7 @@ export async function renderImmersions(el) {
           <h3>Sense immersions</h3>
           <p>Registra la teva primera immersió!</p>
         </div>` : `
+        <div class="wrapper-desktop">
         <div class="taula-wrapper">
           <table>
             <thead>
@@ -72,13 +73,19 @@ export async function renderImmersions(el) {
             </tbody>
           </table>
         </div>
+        </div>
+        <div class="wrapper-mobil">
+          <div class="grid-targetes">
+            ${immersions.map(targetaImm).join('')}
+          </div>
+        </div>`}
         ${totalPag > 1 ? `
           <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1.5rem;">
             <button class="btn btn-secondary btn-sm" id="pag-ant" ${pagina <= 1 ? 'disabled' : ''}>← Anterior</button>
             <span style="padding:0.35rem 0.75rem;color:var(--color-gris)">Pàg. ${pagina} / ${totalPag}</span>
             <button class="btn btn-secondary btn-sm" id="pag-seg" ${pagina >= totalPag ? 'disabled' : ''}>Següent →</button>
           </div>` : ''}
-      `}`;
+      `;
 
     // Events
     el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModal(null));
@@ -90,6 +97,13 @@ export async function renderImmersions(el) {
       tr.addEventListener('click', (e) => {
         if (e.target.closest('button')) return;
         window.location.hash = `/immersio/${tr.dataset.id}`;
+      });
+    });
+
+    el.querySelectorAll('.wrapper-mobil .targeta').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        window.location.hash = `/immersio/${card.dataset.id}`;
       });
     });
 
@@ -320,6 +334,34 @@ export async function renderImmersions(el) {
   }, { once: true });
 
   await renderLlista();
+
+  // Ruta per crear una nova immersió (des del dashboard)
+  if (id === 'nova') {
+    obrirModal(null);
+    history.replaceState(null, '', '#/immersions');
+  }
+}
+
+function targetaImm(i) {
+  return `
+    <article class="targeta" data-id="${i.id}">
+      <div class="targeta-cap">
+        <span class="targeta-num">#${i.numero_immersio || '—'}</span>
+        <span class="targeta-data">${formatData(i.data)}</span>
+      </div>
+      <div class="targeta-titol">${i.zona_nom || 'Sense zona'}</div>
+      ${i.centre_nom ? `<div class="targeta-subtit">${i.centre_nom}</div>` : ''}
+      <div class="targeta-meta">
+        ${i.profunditat_max ? `<span class="targeta-chip">📏 ${i.profunditat_max} m</span>` : ''}
+        ${i.temps_fons ? `<span class="targeta-chip">⏱️ ${i.temps_fons} min</span>` : ''}
+        ${badgeVis(i.visibilitat)}
+        ${estrelles(i.valoracio)}
+      </div>
+      <div class="targeta-accions">
+        <button class="btn btn-ghost btn-sm btn-editar" data-id="${i.id}" title="Editar">✏️</button>
+        <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${i.id}" title="Eliminar">🗑️</button>
+      </div>
+    </article>`;
 }
 
 function formatData(d) {

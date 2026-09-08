@@ -42,6 +42,9 @@ async function enrutarHash() {
   const [base, id] = hash.split('/').filter(Boolean);
   const ruta = '/' + (base || '');
 
+  // Tancar el menú mòbil en navegar
+  document.body.classList.remove('menu-obert');
+
   // Actualitzar nav actiu
   document.querySelectorAll('.nav-link').forEach(el => {
     el.classList.toggle('actiu', el.dataset.route === ruta || (ruta === '/' && el.dataset.route === '/'));
@@ -69,8 +72,25 @@ async function enrutarHash() {
   }
 }
 
+// ── Menú mòbil (hamburguesa) ──────────────────────────────
+function initMenu() {
+  const btn = document.getElementById('btn-menu');
+  const overlay = document.getElementById('sidebar-overlay');
+  const sidebar = document.getElementById('sidebar');
+
+  btn?.addEventListener('click', () => document.body.classList.toggle('menu-obert'));
+  overlay?.addEventListener('click', () => document.body.classList.remove('menu-obert'));
+  sidebar?.addEventListener('click', (e) => {
+    if (e.target.closest('a.nav-link')) document.body.classList.remove('menu-obert');
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) document.body.classList.remove('menu-obert');
+  });
+}
+
 // ── Inicialització ────────────────────────────────────────
 async function init() {
+  initMenu();
   const savedToken = localStorage.getItem('sb_token');
 
   if (savedToken) {

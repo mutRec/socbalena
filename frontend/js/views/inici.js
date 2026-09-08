@@ -15,7 +15,7 @@ export async function renderInici(el) {
       <a href="#/immersions/nova" class="btn btn-primary" id="btn-nova-imm">+ Nova immersió</a>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem;" class="dashboard-grid">
+    <div class="dashboard-grid">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
           <h3>Darreres immersions</h3>
@@ -56,13 +56,6 @@ export async function renderInici(el) {
         </div>
       </div>
     </div>`;
-
-  // Botó nova immersió
-  el.querySelector('#btn-nova-imm').onclick = (e) => {
-    e.preventDefault();
-    window.dispatchEvent(new CustomEvent('obrirNovaImmersio'));
-    window.location.hash = '/immersions';
-  };
 }
 
 function formatData(d) {

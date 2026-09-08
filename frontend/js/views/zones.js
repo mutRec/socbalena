@@ -21,6 +21,7 @@ export async function renderZones(el) {
           <h3>Sense zones</h3>
           <p>Afegeix el primer lloc de busseig</p>
         </div>` : `
+        <div class="wrapper-desktop">
         <div class="taula-wrapper">
           <table>
             <thead>
@@ -52,6 +53,12 @@ export async function renderZones(el) {
                 </tr>`).join('')}
             </tbody>
           </table>
+        </div>
+        </div>
+        <div class="wrapper-mobil">
+          <div class="grid-targetes">
+            ${zones.map(targetaZona).join('')}
+          </div>
         </div>`}`;
 
     el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModal(null, centres));
@@ -196,4 +203,28 @@ function badgeNivell(n) {
   if (!n) return '<span style="color:var(--color-gris)">—</span>';
   const cls = { principiant:'badge-ok', intermedi:'badge-cian', avançat:'badge-warn', expert:'badge-perill' };
   return `<span class="badge ${cls[n]||'badge-gris'}">${n}</span>`;
+}
+
+function targetaZona(z) {
+  const lloc = [z.regio, z.pais].filter(Boolean).join(', ');
+  return `
+    <article class="targeta no-click" data-id="${z.id}">
+      <div class="targeta-cap">
+        <span class="targeta-nom">${escapeHtml(z.nom)}</span>
+        ${badgeTipus(z.tipus)}
+      </div>
+      ${z.centre_nom ? `<div class="targeta-subtit">🏢 ${escapeHtml(z.centre_nom)}</div>` : ''}
+      ${lloc ? `<div class="targeta-subtit">📍 ${escapeHtml(lloc)}</div>` : ''}
+      <div class="targeta-meta">
+        ${z.profunditat_max ? `<span class="targeta-chip">📏 ${z.profunditat_max} m</span>` : ''}
+        ${badgeNivell(z.nivell_dificultat)}
+      </div>
+      <div class="targeta-accions" style="justify-content:space-between;align-items:center">
+        <span class="badge badge-gris">${z.num_immersions || 0} immersions</span>
+        <div style="display:flex;gap:0.25rem">
+          <button class="btn btn-ghost btn-sm btn-editar" data-id="${z.id}" title="Editar">✏️</button>
+          <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${z.id}" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+    </article>`;
 }
