@@ -57,11 +57,14 @@ export async function renderImmersioDetall(el, id) {
           ${paramCard('⏱️ Temps fons', i.temps_fons ? i.temps_fons + ' min' : '—')}
           ${paramCard('🫧 Pressió entrada', i.pressio_entrada ? i.pressio_entrada + ' bar' : '—')}
           ${paramCard('🫧 Pressió sortida', i.pressio_sortida ? i.pressio_sortida + ' bar' : '—')}
+          ${paramCard('🫁 Capacitat ampolla', i.capacitat_bombona ? i.capacitat_bombona + ' L' : '—')}
+          ${paramCard('⏱️ Temps superf.', i.temps_superficie ? i.temps_superficie + ' min' : '—')}
           ${paramCard('💨 Gas', i.tipus_gas || 'Aire')}
           ${paramCard('🌡️ Temp. aigua', i.temp_aigua ? i.temp_aigua + ' °C' : '—')}
           ${paramCard('🌡️ Temp. aire', i.temp_aire ? i.temp_aire + ' °C' : '—')}
-          ${paramCard('👁️ Visibilitat', i.visibilitat || '—')}
-          ${paramCard('🌊 Corrent', i.corrent || '—')}
+          ${paramCard('👁️ Visibilitat', i.visibilitat ? capitalitzar(i.visibilitat) : '—')}
+          ${paramCard('🌊 Corrent', i.corrent ? capitalitzar(i.corrent) : '—')}
+          ${paramCard('🌊 Onatge', i.onatge ? capitalitzar(i.onatge) : '—')}
           ${paramCard('🧥 Vestit', labelVestit(i.tipus_vestit))}
           ${paramCard('⚖️ Llastre', i.pes_llastre ? i.pes_llastre + ' kg' : '—')}
         </div>
@@ -257,4 +260,8 @@ function labelVestit(v) {
 }
 function escapeHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function capitalitzar(text) {
+  if (!text) return '—';
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
