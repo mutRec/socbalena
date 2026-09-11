@@ -10,7 +10,7 @@ export async function renderInici(el) {
     <div class="page-header">
       <div class="page-title">
         <h1>Benvingut/da, ${store.usuari?.nom?.split(' ')[0] || ''}! 🤿</h1>
-        <p class="page-subtitle">El teu diari de busseig</p>
+        <p class="page-subtitle">Taulell diari busseig sócBalena</p>
       </div>
       <a href="#/immersions/nova" class="btn btn-primary" id="btn-nova-imm">+ Nova immersió</a>
     </div>
@@ -22,7 +22,7 @@ export async function renderInici(el) {
           <a href="#/immersions" class="btn btn-ghost btn-sm">Veure totes →</a>
         </div>
         ${darreres.length === 0
-          ? `<div class="buit" style="padding:2rem"><div class="icon">🌊</div><p>Encara no hi ha immersions</p></div>`
+          ? `<div class="buit" style="padding:2rem"><div class="icon">🌊</div><p>Encara no hi ha immersió</p></div>`
           : darreres.map(i => `
             <a href="#/immersio/${i.id}" style="text-decoration:none;display:block;" class="imm-row">
               <div style="display:flex;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--color-superfic);cursor:pointer;" class="hover-row">
@@ -42,10 +42,10 @@ export async function renderInici(el) {
       </div>
 
       <div class="card">
-        <h3 style="margin-bottom:1rem">Accions ràpides</h3>
+        <h3 style="margin-bottom:1rem">¿Qué vols fer?</h3>
         <div style="display:flex;flex-direction:column;gap:0.75rem;">
           <a href="#/immersions" class="btn btn-secondary" style="justify-content:flex-start;gap:1rem">
-            <span>🤿</span> Totes les immersions
+            <span>🤿</span> Veure totes les immersions
           </a>
           <a href="#/centres" class="btn btn-secondary" style="justify-content:flex-start;gap:1rem">
             <span>🏢</span> Gestionar centres
