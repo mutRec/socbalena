@@ -67,7 +67,7 @@ const CAMPS = [
 
 // GET /api/immersions
 router.get('/', async (req, res) => {
-  const { page = 1, limit = 20, zona_id, any: year } = req.query;
+  const { page = 1, limit = 20, zona_id, any: year, q } = req.query;
   const offset = (parseInt(page) - 1) * parseInt(limit);
   const conditions = ['i.usuari_id = $1::uuid'];
   const params = [req.usuari.id];
@@ -75,10 +75,23 @@ router.get('/', async (req, res) => {
 
   if (zona_id) { conditions.push(`i.zona_id = $${pi++}`); params.push(zona_id); }
   if (year) { conditions.push(`EXTRACT(YEAR FROM i.data) = $${pi++}`); params.push(year); }
+  if (q && q.trim()) {
+    const like = `%${q.trim()}%`;
+    conditions.push(`(z.nom ILIKE $${pi} OR i.numero_immersio::text ILIKE $${pi}
+                      OR TO_CHAR(i.data, 'DD/MM/YYYY') ILIKE $${pi}
+                      OR TO_CHAR(i.data, 'YYYY-MM-DD') ILIKE $${pi})`);
+    params.push(like);
+    pi++;
+  }
 
   const where = conditions.join(' AND ');
   try {
-    const total = await pool.query(`SELECT COUNT(*) FROM immersions i WHERE ${where}`, params);
+    const total = await pool.query(
+      `SELECT COUNT(*) FROM immersions i
+       LEFT JOIN zones z ON z.id = i.zona_id
+       WHERE ${where}`,
+      params
+    );
     const { rows } = await pool.query(
       `SELECT i.*, z.nom AS zona_nom, c.nom AS centre_nom,
               (SELECT nom_fitxer FROM media m WHERE m.immersio_id = i.id AND m.es_portada = true LIMIT 1) AS portada

@@ -1,9 +1,10 @@
 // views/perfil.js
 import { api } from '../api.js';
-import { store } from '../app.js';
+import { store, pintarAvatar } from '../app.js';
 
 export async function renderPerfil(el) {
   const u = await api.perfil();
+  store.usuari = u;
 
   el.innerHTML = `
     <div class="page-header">
@@ -15,22 +16,26 @@ export async function renderPerfil(el) {
 
     <div style="max-width:600px;display:flex;flex-direction:column;gap:1.5rem">
 
-      <!-- Info bàsica -->
+      <!-- Info bàsica + foto -->
       <div class="card">
-        <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem">
-          <div style="width:72px;height:72px;border-radius:50%;background:var(--color-cian);
-                      display:flex;align-items:center;justify-content:center;
-                      font-family:'Barlow Condensed',sans-serif;font-size:2rem;
-                      font-weight:700;color:var(--color-abiss);flex-shrink:0">
-            ${u.nom.charAt(0).toUpperCase()}
-          </div>
-          <div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+          <div class="avatar-perfil" id="avatar-perfil"></div>
+          <div style="min-width:180px">
             <h2>${escapeHtml(u.nom)}</h2>
             <p style="color:var(--color-gris)">${escapeHtml(u.email)}</p>
             <span class="badge badge-cian" style="margin-top:0.3rem">${u.rol}</span>
           </div>
         </div>
-        <div style="font-size:0.8rem;color:var(--color-gris)">
+
+        <div id="alert-avatar"></div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          <input type="file" id="inp-avatar" accept="image/*" hidden />
+          <button class="btn btn-primary btn-sm" id="btn-pujar-avatar">📷 Pujar foto</button>
+          <button class="btn btn-ghost btn-sm" id="btn-treure-avatar">Treure foto</button>
+          <span style="font-size:0.75rem;color:var(--color-gris)">JPG, PNG o WEBP · es retallarà en quadrat</span>
+        </div>
+
+        <div style="font-size:0.8rem;color:var(--color-gris);margin-top:1.5rem">
           Membre des de: ${new Date(u.creat_a).toLocaleDateString('ca-ES', { day:'2-digit', month:'long', year:'numeric' })}
         </div>
       </div>
@@ -73,6 +78,49 @@ export async function renderPerfil(el) {
       </div>
     </div>`;
 
+  // ── Foto de perfil ──
+  const avatarEl = el.querySelector('#avatar-perfil');
+  const alertAvatar = el.querySelector('#alert-avatar');
+  const inpAvatar = el.querySelector('#inp-avatar');
+  const btnTreure = el.querySelector('#btn-treure-avatar');
+
+  function refrescarAvatars() {
+    pintarAvatar(avatarEl, store.usuari);
+    pintarAvatar(document.getElementById('user-avatar'), store.usuari);
+    btnTreure.style.display = store.usuari?.avatar_url ? '' : 'none';
+  }
+  refrescarAvatars();
+
+  el.querySelector('#btn-pujar-avatar').onclick = () => inpAvatar.click();
+
+  inpAvatar.addEventListener('change', async () => {
+    const fitxer = inpAvatar.files?.[0];
+    if (!fitxer) return;
+    alertAvatar.innerHTML = '<div class="alert alert-info">Pujant la foto...</div>';
+    try {
+      const { avatar_url } = await api.pujarAvatar(fitxer);
+      store.usuari.avatar_url = avatar_url;
+      refrescarAvatars();
+      alertAvatar.innerHTML = '<div class="alert alert-ok">✓ Foto de perfil actualitzada</div>';
+    } catch (err) {
+      alertAvatar.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    } finally {
+      inpAvatar.value = '';
+    }
+  });
+
+  btnTreure.onclick = async () => {
+    if (!confirm('Treure la foto de perfil?')) return;
+    try {
+      await api.eliminarAvatar();
+      store.usuari.avatar_url = null;
+      refrescarAvatars();
+      alertAvatar.innerHTML = '<div class="alert alert-ok">✓ Foto eliminada</div>';
+    } catch (err) {
+      alertAvatar.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+  };
+
   // Desar nom
   el.querySelector('#btn-desar-nom').onclick = async () => {
     const nom = el.querySelector('#inp-nom').value.trim();
@@ -83,7 +131,7 @@ export async function renderPerfil(el) {
       // Per ara, actualitzem localment
       store.usuari.nom = nom;
       document.getElementById('user-nom').textContent = nom;
-      document.getElementById('user-avatar').textContent = nom.charAt(0).toUpperCase();
+      refrescarAvatars();
       alertEl.innerHTML = '<div class="alert alert-ok">✓ Nom actualitzat</div>';
     } catch (err) {
       alertEl.innerHTML = `<div class="alert alert-error">${err.message}</div>`;

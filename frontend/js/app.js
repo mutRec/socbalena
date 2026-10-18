@@ -117,15 +117,27 @@ export function mostrarApp() {
   document.getElementById('app-shell').style.display = 'grid';
 
   // Actualitzar info d'usuari al topbar
-  const nom = store.usuari?.nom || '';
-  document.getElementById('user-nom').textContent = nom;
-  document.getElementById('user-avatar').textContent = nom.charAt(0).toUpperCase() || '?';
+  document.getElementById('user-nom').textContent = store.usuari?.nom || '';
+  pintarAvatar(document.getElementById('user-avatar'), store.usuari);
 
   document.getElementById('btn-logout').onclick = () => {
     store.clearSession();
     mostrarLogin();
     window.location.hash = '/';
   };
+}
+
+// Dibuixa l'avatar: foto si n'hi ha, o la inicial del nom
+export function pintarAvatar(element, usuari) {
+  if (!element) return;
+  const url = usuari?.avatar_url;
+  if (url) {
+    element.classList.add('amb-foto');
+    element.innerHTML = `<img src="${url}" alt="" />`;
+  } else {
+    element.classList.remove('amb-foto');
+    element.textContent = (usuari?.nom || '?').charAt(0).toUpperCase() || '?';
+  }
 }
 
 export function mostrarLogin() {

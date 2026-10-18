@@ -154,6 +154,25 @@ h3 { font-size: 1.2rem; font-weight: 500; }
 .page-title { display: flex; flex-direction: column; gap: 0.2rem; }
 .page-subtitle { color: var(--color-gris); font-size: 0.9rem; }
 
+/* Barra de filtres + paginació (llistats) */
+.barra-filtres {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.barra-filtres .form-input { flex: 1; min-width: 220px; max-width: 420px; }
+.paginacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.pag-info { font-size: 0.85rem; color: var(--color-gris); padding: 0 0.25rem; }
+
 /* ── COMPONENTS ──────────────────────────────────── */
 
 /* Cards */
@@ -488,7 +507,23 @@ tr.clickable { cursor: pointer; }
   font-family: var(--font-display);
   font-weight: 700; color: var(--color-abiss);
   font-size: 0.9rem;
+  overflow: hidden;
+  flex-shrink: 0;
 }
+.user-avatar.amb-foto { background: var(--color-superfic); }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+
+/* Avatar gran de la pàgina de perfil */
+.avatar-perfil {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: var(--color-cian);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 2.5rem; font-weight: 700;
+  color: var(--color-abiss); flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid var(--color-superfic);
+}
+.avatar-perfil img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
 
 /* Alerts */
 .alert {

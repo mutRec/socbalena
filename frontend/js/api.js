@@ -31,6 +31,12 @@ export const api = {
   // Auth
   login:    (email, password) => req('POST', '/auth/login', { email, password }),
   perfil:   () => req('GET', '/auth/perfil'),
+  pujarAvatar: (fitxer) => {
+    const fd = new FormData();
+    fd.append('avatar', fitxer);
+    return req('POST', '/auth/avatar', fd, true);
+  },
+  eliminarAvatar: () => req('DELETE', '/auth/avatar'),
 
   // Immersions
   immersions: {

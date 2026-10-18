@@ -5,87 +5,129 @@ import { obrirModalImmersio } from './immersio-modal.js';
 export async function renderImmersions(el, id) {
   let pagina = 1;
   const limit = 20;
+  let filtre = '';
+  let temporitzador = null;
 
   async function carregarDades() {
-    return api.immersions.llista({ page: pagina, limit });
+    const params = { page: pagina, limit };
+    if (filtre.trim()) params.q = filtre.trim();
+    return api.immersions.llista(params);
   }
 
-  async function renderLlista() {
-    el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    const { total, immersions } = await carregarDades();
-    const totalPag = Math.ceil(total / limit);
-
+  // ── Estructura fixa (capçalera + filtre + paginació) ──
+  function pintarEstructura() {
     el.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Immersions</h1>
-          <p class="page-subtitle">${total} registrades en total</p>
+          <p class="page-subtitle" id="subtitol-imm">Carregant...</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova immersió</button>
       </div>
 
-      ${immersions.length === 0 ? `
-        <div class="buit">
-          <div class="icon">🤿</div>
-          <h3>Sense immersions</h3>
-          <p>Registra la teva primera immersió!</p>
-        </div>` : `
-        <div class="wrapper-desktop">
-        <div class="taula-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Data</th>
-                <th>Zona</th>
-                <th>Prof. màx</th>
-                <th>Temps fons</th>
-                <th>Visibilitat</th>
-                <th>Valoració</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="tbody-imm">
-              ${immersions.map(i => `
-                <tr class="clickable" data-id="${i.id}">
-                  <td><strong style="color:var(--color-cian)">#${i.numero_immersio || '—'}</strong></td>
-                  <td>${formatData(i.data)}</td>
-                  <td>
-                    <div>${i.zona_nom || '<span style="color:var(--color-gris)">—</span>'}</div>
-                    ${i.centre_nom ? `<div style="font-size:0.75rem;color:var(--color-gris)">${i.centre_nom}</div>` : ''}
-                  </td>
-                  <td>${i.profunditat_max ? `<strong>${i.profunditat_max}m</strong>` : '—'}</td>
-                  <td>${i.temps_fons ? i.temps_fons + ' min' : '—'}</td>
-                  <td>${badgeVis(i.visibilitat)}</td>
-                  <td>${estrelles(i.valoracio)}</td>
-                  <td>
-                    <button class="btn btn-ghost btn-sm btn-editar" data-id="${i.id}" title="Editar">✏️</button>
-                    <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${i.id}" title="Eliminar">🗑️</button>
-                  </td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
+      <div class="barra-filtres">
+        <input class="form-input" id="filtre-imm" type="search"
+               placeholder="🔍 Cercar per zona, núm. o data..."
+               value="${escapeAttr(filtre)}" />
+        <div class="paginacio" id="paginacio-top"></div>
+      </div>
+
+      <div id="resultats-imm"></div>
+
+      <div class="paginacio" id="paginacio-bot" style="margin-top:1.5rem"></div>
+    `;
+
+    el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModalImmersio(null, { onDesat: renderResultats }));
+
+    const input = el.querySelector('#filtre-imm');
+    input.addEventListener('input', () => {
+      filtre = input.value;
+      clearTimeout(temporitzador);
+      temporitzador = setTimeout(() => { pagina = 1; renderResultats(); }, 300);
+    });
+  }
+
+  // ── Paginació (es pinta a dalt i a baix) ──
+  function actualitzarPaginacio(totalPag) {
+    const contingut = totalPag <= 1 ? '' : `
+      <button class="btn btn-secondary btn-sm btn-pag" data-dir="ant" ${pagina <= 1 ? 'disabled' : ''}>← Anterior</button>
+      <span class="pag-info">Pàg. ${pagina} / ${totalPag}</span>
+      <button class="btn btn-secondary btn-sm btn-pag" data-dir="seg" ${pagina >= totalPag ? 'disabled' : ''}>Següent →</button>`;
+
+    el.querySelectorAll('.paginacio').forEach(cont => {
+      cont.innerHTML = contingut;
+      cont.querySelectorAll('.btn-pag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pagina += btn.dataset.dir === 'ant' ? -1 : 1;
+          renderResultats();
+        });
+      });
+    });
+  }
+
+  // ── Resultats (taula + targetes) ──
+  async function renderResultats() {
+    const resultats = el.querySelector('#resultats-imm');
+    resultats.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+    const { total, immersions } = await carregarDades();
+    const totalPag = Math.ceil(total / limit);
+    const filtrant = !!filtre.trim();
+
+    el.querySelector('#subtitol-imm').textContent = filtrant
+      ? `${total} ${total === 1 ? 'resultat' : 'resultats'} per a «${filtre.trim()}»`
+      : `${total} registrades en total`;
+
+    resultats.innerHTML = immersions.length === 0 ? `
+      <div class="buit">
+        <div class="icon">🤿</div>
+        <h3>${filtrant ? 'Sense resultats' : 'Sense immersions'}</h3>
+        <p>${filtrant ? 'Prova amb un altre filtre de cerca.' : 'Registra la teva primera immersió!'}</p>
+      </div>` : `
+      <div class="wrapper-desktop">
+      <div class="taula-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Data</th>
+              <th>Zona</th>
+              <th>Prof. màx</th>
+              <th>Temps fons</th>
+              <th>Visibilitat</th>
+              <th>Valoració</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-imm">
+            ${immersions.map(i => `
+              <tr class="clickable" data-id="${i.id}">
+                <td><strong style="color:var(--color-cian)">#${i.numero_immersio || '—'}</strong></td>
+                <td>${formatData(i.data)}</td>
+                <td>
+                  <div>${i.zona_nom || '<span style="color:var(--color-gris)">—</span>'}</div>
+                  ${i.centre_nom ? `<div style="font-size:0.75rem;color:var(--color-gris)">${i.centre_nom}</div>` : ''}
+                </td>
+                <td>${i.profunditat_max ? `<strong>${i.profunditat_max}m</strong>` : '—'}</td>
+                <td>${i.temps_fons ? i.temps_fons + ' min' : '—'}</td>
+                <td>${badgeVis(i.visibilitat)}</td>
+                <td>${estrelles(i.valoracio)}</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm btn-editar" data-id="${i.id}" title="Editar">✏️</button>
+                  <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${i.id}" title="Eliminar">🗑️</button>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      </div>
+      <div class="wrapper-mobil">
+        <div class="grid-targetes">
+          ${immersions.map(targetaImm).join('')}
         </div>
-        </div>
-        <div class="wrapper-mobil">
-          <div class="grid-targetes">
-            ${immersions.map(targetaImm).join('')}
-          </div>
-        </div>`}
-        ${totalPag > 1 ? `
-          <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1.5rem;">
-            <button class="btn btn-secondary btn-sm" id="pag-ant" ${pagina <= 1 ? 'disabled' : ''}>← Anterior</button>
-            <span style="padding:0.35rem 0.75rem;color:var(--color-gris)">Pàg. ${pagina} / ${totalPag}</span>
-            <button class="btn btn-secondary btn-sm" id="pag-seg" ${pagina >= totalPag ? 'disabled' : ''}>Següent →</button>
-          </div>` : ''}
-      `;
+      </div>`;
 
-    // Events
-    el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModalImmersio(null, { onDesat: renderLlista }));
-
-    el.querySelector('#pag-ant')?.addEventListener('click', () => { pagina--; renderLlista(); });
-    el.querySelector('#pag-seg')?.addEventListener('click', () => { pagina++; renderLlista(); });
-
+    // Events de les files
     el.querySelectorAll('tr.clickable').forEach(tr => {
       tr.addEventListener('click', (e) => {
         if (e.target.closest('button')) return;
@@ -101,7 +143,7 @@ export async function renderImmersions(el, id) {
     });
 
     el.querySelectorAll('.btn-editar').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); obrirModalImmersio(btn.dataset.id, { onDesat: renderLlista }); });
+      btn.addEventListener('click', (e) => { e.stopPropagation(); obrirModalImmersio(btn.dataset.id, { onDesat: renderResultats }); });
     });
 
     el.querySelectorAll('.btn-eliminar').forEach(btn => {
@@ -109,21 +151,24 @@ export async function renderImmersions(el, id) {
         e.stopPropagation();
         if (!confirm('Eliminar aquesta immersió i totes les seves fotos?')) return;
         await api.immersions.eliminar(btn.dataset.id);
-        renderLlista();
+        renderResultats();
       });
     });
+
+    actualitzarPaginacio(totalPag);
   }
 
   // Escoltar event de l'inici
   window.addEventListener('obrirNovaImmersio', () => {
-    if (el.querySelector('#btn-nova')) obrirModalImmersio(null, { onDesat: renderLlista });
+    if (el.querySelector('#btn-nova')) obrirModalImmersio(null, { onDesat: renderResultats });
   }, { once: true });
 
-  await renderLlista();
+  pintarEstructura();
+  await renderResultats();
 
   // Ruta per crear una nova immersió (des del dashboard)
   if (id === 'nova') {
-    obrirModalImmersio(null, { onDesat: renderLlista });
+    obrirModalImmersio(null, { onDesat: renderResultats });
     history.replaceState(null, '', '#/immersions');
   }
 }
@@ -162,4 +207,7 @@ function badgeVis(v) {
   if (!v) return '<span style="color:var(--color-gris)">—</span>';
   const cls = { 'excel·lent': 'badge-ok', 'bona': 'badge-ok', 'moderada': 'badge-warn', 'dolenta': 'badge-perill', 'nul·la': 'badge-perill' };
   return `<span class="badge ${cls[v] || 'badge-gris'}">${v}</span>`;
+}
+function escapeAttr(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
