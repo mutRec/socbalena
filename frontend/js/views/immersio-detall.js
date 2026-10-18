@@ -122,19 +122,9 @@ export async function renderImmersioDetall(el, id) {
     el.querySelector('#btn-pdf').onclick = () => generarPDF(i);
 
     el.querySelector('#btn-editar').onclick = async () => {
-      // Reutilitzem el modal d'edició de la vista llista
-      const { renderImmersions } = await import('./immersions.js');
-      // Naveguem a la llista amb editar obert via hash
-      window.location.hash = `/immersions`;
-      setTimeout(async () => {
-        const mainContent = document.getElementById('main-content');
-        // Simular clic editar
-        const immsView = document.createElement('div');
-        await renderImmersions(immsView);
-        // trigger edit
-        const edBtn = immsView.querySelector(`[data-id="${id}"].btn-editar`);
-        edBtn?.click();
-      }, 300);
+      // Reutilitzem el modal compartit i refresquem la fitxa en desar
+      const { obrirModalImmersio } = await import('./immersio-modal.js');
+      obrirModalImmersio(id, { onDesat: carregar });
     };
 
     // Upload
