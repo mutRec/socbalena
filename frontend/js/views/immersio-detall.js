@@ -15,7 +15,7 @@ export async function renderImmersioDetall(el, id) {
     el.innerHTML = `
       <div class="page-header no-print">
         <div class="page-header-left">
-          <a href="#/immersions" class="btn btn-ghost btn-sm">← Tornar</a>
+          <button class="btn btn-secondary btn-sm" id="btn-tornar">Tornar</button>
           <div class="page-title">
             <h1>Immersió #${i.numero_immersio || '—'}</h1>
             <p class="page-subtitle">${formatData(i.data)} · ${i.zona_nom || 'Sense zona'}</p>
@@ -117,6 +117,8 @@ export async function renderImmersioDetall(el, id) {
       </div>`;
 
     // ── Events ────────────────────────────────────
+    el.querySelector('#btn-tornar').onclick = () => { window.location.hash = '/immersions'; };
+
     el.querySelector('#btn-imprimir').onclick = () => window.print();
 
     el.querySelector('#btn-pdf').onclick = () => generarPDF(i);
