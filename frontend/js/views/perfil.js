@@ -30,9 +30,9 @@ export async function renderPerfil(el) {
         <div id="alert-avatar"></div>
         <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
           <input type="file" id="inp-avatar" accept="image/*" hidden />
-          <button class="btn btn-primary btn-sm" id="btn-pujar-avatar">📷 Pujar foto</button>
-          <button class="btn btn-ghost btn-sm" id="btn-treure-avatar">Treure foto</button>
-          <span style="font-size:0.75rem;color:var(--color-gris)">JPG, PNG o WEBP · es retallarà en quadrat</span>
+          <button class="btn btn-primary btn-sm" id="btn-pujar-avatar">Pujar foto</button>
+          <button class="btn btn-primary btn-sm" id="btn-treure-avatar">Treure foto</button>
+          <span style="font-size:0.75rem;color:var(--color-gris)">JPG, PNG o WEBP · es retallarà en cercle.</span>
         </div>
 
         <div style="font-size:0.8rem;color:var(--color-gris);margin-top:1.5rem">
