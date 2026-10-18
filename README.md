@@ -62,7 +62,8 @@ socbalena/
 │       └── views/
 │           ├── login.js        ← Formulari login
 │           ├── inici.js        ← Dashboard amb darreres immersions
-│           ├── immersions.js   ← Llista paginada + formulari creació/edició
+│           ├── immersions.js   ← Llista paginada + filtre + formulari creació/edició
+│           ├── immersio-modal.js ← Modal compartit crear/editar immersió
 │           ├── immersio-detall.js ← Fitxa detallada + galeria media
 │           ├── centres.js      ← Llista i gestió de centres
 │           ├── zones.js        ← Llista i gestió de zones
@@ -145,14 +146,13 @@ Espera uns 30 segons perquè PostgreSQL inicialitzi l'esquema i les dades demo.
 | API Health Check | http://localhost:3002/api/health |
 | PostgreSQL | localhost:5432 |
 
-### Credencials de demo
+### Primer accés
 
-| Camp | Valor |
-|------|-------|
-| Email | `admin@socbalena.cat` |
-| Contrasenya | `Demo1234!` |
+L'esquema (`db/init.sql`) crea un usuari de demo `admin@socbalena.cat`, però **sense cap contrasenya utilitzable**. Abans de poder entrar-hi cal assignar-n'hi una; el més pràctic és crear un usuari nou o posar contrasenya a l'existent amb l'script de manteniment.
 
-> Canvia la contrasenya de demo en producció!
+👉 Consulta **[Crear un usuari nou](#crear-un-usuari-nou)**.
+
+> En producció, canvia sempre les contrasenyes dels usuaris que creïs.
 
 ## API Reference
 
@@ -167,14 +167,23 @@ POST /api/auth/login
 
 GET  /api/auth/perfil
   Resposta: { id, nom, email, rol, avatar_url, creat_a }
+
+POST /api/auth/avatar
+  Body: multipart/form-data { avatar }
+  Resposta: { avatar_url }
+  Nota: la imatge es retalla en quadrat i s'escala a 400x400. Màx. 10 MB.
+
+DELETE /api/auth/avatar
+  Resposta: 204 No Content
 ```
 
 ### Immersions
 
 ```
 GET    /api/immersions
-  Query: ?page=1&limit=20&zona_id=<uuid>&any=2024
+  Query: ?page=1&limit=20&zona_id=<uuid>&any=2024&q=<text>
   Resposta: { total, pagina, immersions: [...] }
+  Nota: q cerca per nom de zona, número d'immersió o data (DD/MM/YYYY o YYYY-MM-DD)
 
 GET    /api/immersions/:id
   Resposta: immersió completa + media: [...]
@@ -319,6 +328,63 @@ El directori `manteniment/` conté scripts SQL per tasques administratives:
 | `immersions_backup.dump` | Backup PostgreSQL en format custom |
 | `info-backup-bbdd.txt` | Instruccions detallades de backup/restore |
 
+### Crear un usuari nou
+
+Les contrasenyes es desen com a hash **bcrypt**, mai en text pla. El contenidor backend ja porta `bcryptjs`, així que pots generar el hash sense instal·lar res.
+
+**1. Genera el hash de la contrasenya** (substitueix `LA_TEVA_CLAU`):
+
+```bash
+docker exec socbalena_backend node -e "console.log(require('bcryptjs').hashSync('LA_TEVA_CLAU', 10))"
+```
+
+Sortida d'exemple (això és el que copiaràs al pas 2):
+
+```
+$2b$10$U8e6q4ZRmGyxpDrcuJsI2uQC/Es449DknJbl/iGVGot287y/XskTO
+```
+
+**2. Edita `manteniment/crearUsuariApp.sql`** amb el nom, l'email i el hash:
+
+```sql
+INSERT INTO usuaris (nom, email, password_hash, rol)
+VALUES ('Nou Nom', 'nou@exemple.cat', '$2b$10$...el-teu-hash...', 'bussejador');
+```
+
+- `id` i `creat_a` tenen valors per defecte (`uuid_generate_v4()` i `NOW()`), no cal indicar-los.
+- `rol` només admet `admin` o `bussejador`.
+- `avatar_url` pot quedar a `NULL` (es pot pujar després des del perfil).
+
+**3. Executa l'script a la base de dades:**
+
+```bash
+docker cp ./manteniment/crearUsuariApp.sql socbalena_db:/tmp/crearUsuari.sql
+docker exec socbalena_db psql -U socbalena -d socbalena -f /tmp/crearUsuari.sql
+```
+
+**4. Verifica i prova l'accés** a http://localhost:8085:
+
+```bash
+docker exec socbalena_db psql -U socbalena -d socbalena -c "SELECT nom,email,rol,creat_a FROM usuaris ORDER BY creat_a;"
+```
+
+> **Windows / PowerShell:** si prefereixes enganxar l'SQL directament, entra al psql interactiu
+> (`docker compose exec db psql -U socbalena -d socbalena`) i enganxa-hi l'`INSERT`. Així evites
+> que PowerShell interpreti els caràcters `$` del hash. Per sortir, `\q`.
+
+**Canviar la contrasenya d'un usuari existent** (per exemple si l'has oblidada): genera el hash (pas 1) i, dins del psql interactiu:
+
+```sql
+UPDATE usuaris SET password_hash = '$2b$10$...hash-nou...' WHERE email = 'usuari@exemple.cat';
+```
+
+**Errors típics**
+
+| Error | Causa |
+|-------|-------|
+| `duplicate key value violates unique constraint "usuaris_email_key"` | Ja existeix un usuari amb aquest email |
+| `violates check constraint "usuaris_rol_check"` | El `rol` no és ni `admin` ni `bussejador` |
+
 ## Seguretat en producció
 
 1. **Canvia tots els secrets** al fitxer `.env`
@@ -326,7 +392,7 @@ El directori `manteniment/` conté scripts SQL per tasques administratives:
 3. Configura HTTPS (Let's Encrypt + Certbot)
 4. Limita l'accés al port 5432 de PostgreSQL
 5. Activa còpies de seguretat periòdiques
-6. Canvia les credencials de demo (`Demo1234!`)
+6. Assigna contrasenyes segures als usuaris que creïs
 7. Revisa els permisos del volum `uploads`
 
 ## Rutes SPA (frontend)
