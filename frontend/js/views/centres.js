@@ -23,20 +23,29 @@ export async function renderCentres(el) {
         </div>` : `
         <div class="grid-cards" id="grid-centres">
           ${centres.map(c => `
-            <div class="card" style="cursor:pointer" data-id="${c.id}">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+            <div class="card no-click">
+              <div class="centre-cap">
                 <h3>${escapeHtml(c.nom)}</h3>
                 <div style="display:flex;gap:0.25rem">
-                  <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}">✏️</button>
-                  <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${c.id}">🗑️</button>
+                  <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}" title="Editar">✏️</button>
+                  <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${c.id}" title="Eliminar">🗑️</button>
                 </div>
               </div>
-              ${c.pais || c.regio ? `<div style="color:var(--color-gris);font-size:0.875rem;margin-bottom:0.5rem">📍 ${[c.regio, c.pais].filter(Boolean).join(', ')}</div>` : ''}
-              ${c.telefon ? `<div style="font-size:0.875rem">📞 ${escapeHtml(c.telefon)}</div>` : ''}
-              ${c.email ? `<div style="font-size:0.875rem">✉️ ${escapeHtml(c.email)}</div>` : ''}
-              ${c.web ? `<div style="font-size:0.875rem"><a href="${escapeHtml(c.web)}" target="_blank" style="color:var(--color-cian)">${escapeHtml(c.web)}</a></div>` : ''}
-              <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--color-superfic)">
-                <span class="badge badge-cian">${c.num_zones || 0} zones</span>
+              <div class="centre-cos">
+                <div class="centre-info">
+                  ${c.pais || c.regio ? `<div class="centre-linia">📍 ${[c.regio, c.pais].filter(Boolean).join(', ')}</div>` : ''}
+                  ${c.telefon ? `<div class="centre-linia">📞 ${escapeHtml(c.telefon)}</div>` : ''}
+                  ${c.email ? `<div class="centre-linia">✉️ ${escapeHtml(c.email)}</div>` : ''}
+                  ${c.web ? `<div class="centre-linia"><a href="${escapeHtml(c.web)}" target="_blank" style="color:var(--color-cian)">${escapeHtml(c.web)}</a></div>` : ''}
+                  <div class="centre-peu">
+                    <span class="badge badge-cian">${c.num_zones || 0} zones</span>
+                  </div>
+                </div>
+                <div class="centre-logo">
+                  ${c.logo_url
+                    ? `<img src="${escapeHtml(c.logo_url)}" alt="Logotip de ${escapeHtml(c.nom)}" loading="lazy" />`
+                    : `<span class="centre-logo-buit" title="Sense logotip">🏢</span>`}
+                </div>
               </div>
             </div>`).join('')}
         </div>`}`;
@@ -98,6 +107,18 @@ export async function renderCentres(el) {
               <input class="form-input" type="url" name="web" placeholder="https://" />
             </div>
             <div class="form-group">
+              <label class="form-label">Logotip</label>
+              <div class="logo-editor">
+                <div class="logo-preview" id="logo-preview"></div>
+                <div class="logo-accions">
+                  <input type="file" id="logo-input" accept="image/jpeg,image/png,image/webp,image/heic" hidden />
+                  <button type="button" class="btn btn-secondary btn-sm" id="logo-tria">📷 Triar imatge</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="logo-treure">🗑️ Treure</button>
+                  <div class="form-hint">JPG, PNG o WEBP · màx. 10 MB · es mostrarà en rodó, a la dreta de la fitxa del centre</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
               <label class="form-label">Notes</label>
               <textarea class="form-textarea" name="notes"></textarea>
             </div>
@@ -111,6 +132,35 @@ export async function renderCentres(el) {
 
     document.body.appendChild(overlay);
 
+    // ── Logotip ─────────────────────────────────────
+    const logoPreview = overlay.querySelector('#logo-preview');
+    const logoInput = overlay.querySelector('#logo-input');
+    let logoActual = null;      // logo_url desat al servidor
+    let logoFitxer = null;      // fitxer nou triat (encara no pujat)
+    let logoEsborrar = false;   // l'usuari vol treure el logotip
+
+    const pintarLogo = (src) => {
+      logoPreview.innerHTML = src
+        ? `<img src="${src}" alt="Logotip" />`
+        : '<span class="logo-buit" title="Sense logotip">🏢</span>';
+    };
+    pintarLogo(null);
+
+    overlay.querySelector('#logo-tria').onclick = () => logoInput.click();
+    logoInput.addEventListener('change', () => {
+      const f = logoInput.files && logoInput.files[0];
+      if (!f) return;
+      logoFitxer = f;
+      logoEsborrar = false;
+      pintarLogo(URL.createObjectURL(f));
+    });
+    overlay.querySelector('#logo-treure').onclick = () => {
+      logoFitxer = null;
+      logoEsborrar = true;
+      logoInput.value = '';
+      pintarLogo(null);
+    };
+
     // Precarregar dades si editem
     if (id) {
       api.centres.obtenir(id).then(c => {
@@ -119,6 +169,8 @@ export async function renderCentres(el) {
           const inp = form.querySelector(`[name="${k}"]`);
           if (inp && c[k] != null) inp.value = c[k];
         });
+        logoActual = c.logo_url || null;
+        pintarLogo(logoActual);
       });
     }
 
@@ -127,15 +179,25 @@ export async function renderCentres(el) {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
     overlay.querySelector('#desar').addEventListener('click', async () => {
+      const btnDesar = overlay.querySelector('#desar');
       const dades = Object.fromEntries(new FormData(overlay.querySelector('#form-centre')));
       Object.keys(dades).forEach(k => { if (dades[k] === '') dades[k] = null; });
+      btnDesar.disabled = true;
+      btnDesar.textContent = '💾 Desant...';
       try {
-        if (id) await api.centres.editar(id, dades);
-        else     await api.centres.crear(dades);
+        const centre = id ? await api.centres.editar(id, dades) : await api.centres.crear(dades);
+        const centreId = id || centre?.id;
+
+        // El logotip es puja després de desar perquè en un centre nou encara no hi ha ID
+        if (centreId && logoFitxer) await api.centres.pujarLogo(centreId, logoFitxer);
+        else if (centreId && logoEsborrar && logoActual) await api.centres.eliminarLogo(centreId);
+
         overlay.remove();
         renderLlista();
       } catch (err) {
         overlay.querySelector('#alert-c').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+        btnDesar.disabled = false;
+        btnDesar.textContent = '💾 Desar';
       }
     });
   }

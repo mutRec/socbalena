@@ -24,6 +24,7 @@ CREATE TABLE centres (
   telefon VARCHAR(50),
   email VARCHAR(255),
   web VARCHAR(255),
+  logo_url TEXT,
   notes TEXT,
   creat_a TIMESTAMPTZ DEFAULT NOW()
 );

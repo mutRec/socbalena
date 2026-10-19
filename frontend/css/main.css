@@ -189,6 +189,9 @@ h3 { font-size: 1.2rem; font-weight: 500; }
 }
 .card:hover { border-color: var(--color-cian-dim); }
 .card.glow { box-shadow: var(--shadow-glow); border-color: var(--color-cian); }
+/* Cards que no són clicables: només els botons fan acció */
+.card.no-click { cursor: default; }
+.card.no-click:hover { border-color: var(--color-superfic); }
 
 /* Grid de cards */
 .grid-cards {
@@ -196,6 +199,52 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }
+
+/* Targeta de centre: logotip arrodonit a la dreta */
+.centre-cap {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.centre-cos { display: flex; align-items: flex-start; gap: 1rem; }
+.centre-info { flex: 1; min-width: 0; }
+.centre-linia { font-size: 0.875rem; margin-bottom: 0.15rem; overflow-wrap: anywhere; }
+.centre-peu { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--color-superfic); }
+.centre-logo {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-blanc);       /* fons clar: els logotips foscos es veuen bé */
+  border: 2px solid var(--color-superfic);
+  box-shadow: var(--shadow-card);
+}
+.centre-logo img { width: 100%; height: 100%; object-fit: contain; padding: 9px; }
+.centre-logo-buit { font-size: 2rem; opacity: 0.3; }
+
+/* Editor de logotip del centre (modal) */
+.logo-editor { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.logo-preview {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-blanc);
+  border: 2px solid var(--color-superfic);
+}
+.logo-preview img { width: 100%; height: 100%; object-fit: contain; padding: 9px; }
+.logo-buit { font-size: 2rem; opacity: 0.3; }
+.logo-accions { display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; min-width: 0; }
 
 /* Doble presentació: taula en escriptori, targetes en mòbil */
 .wrapper-desktop { display: block; }
@@ -703,6 +752,11 @@ tr.clickable { cursor: pointer; }
   .fitxa-data { text-align: left; }
   .param-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
   .galeria { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+
+  /* Targeta de centre */
+  .centre-logo { width: 72px; height: 72px; }
+  .centre-logo img { padding: 7px; }
+  .logo-preview { width: 76px; height: 76px; }
 
   /* Dashboard */
   .dashboard-grid { display: grid; grid-template-columns: 1fr !important; }

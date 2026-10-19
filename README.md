@@ -325,6 +325,7 @@ El directori `manteniment/` conté scripts SQL per tasques administratives:
 | `crearUsuariApp.sql` | Script per crear nous usuaris amb hash bcrypt |
 | `inserts_immersions.sql` | Inserció massiva d'immersions de prova |
 | `purgar_dades_taules.sql` | Neteja completa de taules |
+| `afegir_logo_centres.sql` | Afegeix la columna `logo_url` a `centres` (logotips) |
 | `immersions_backup.dump` | Backup PostgreSQL en format custom |
 | `info-backup-bbdd.txt` | Instruccions detallades de backup/restore |
 

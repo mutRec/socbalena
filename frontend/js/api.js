@@ -54,6 +54,12 @@ export const api = {
     crear:    (dades)      => req('POST', '/centres', dades),
     editar:   (id, dades)  => req('PUT', `/centres/${id}`, dades),
     eliminar: (id)         => req('DELETE', `/centres/${id}`),
+    pujarLogo: (id, fitxer) => {
+      const fd = new FormData();
+      fd.append('logo', fitxer);
+      return req('POST', `/centres/${id}/logo`, fd, true);
+    },
+    eliminarLogo: (id)     => req('DELETE', `/centres/${id}/logo`),
   },
 
   // Zones

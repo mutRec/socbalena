@@ -9,8 +9,8 @@ export async function renderZones(el) {
     el.innerHTML = `
       <div class="page-header">
         <div class="page-title">
-          <h1>Zones de busseig</h1>
-          <p class="page-subtitle">${zones.length} zones registrades</p>
+          <h1>Zones i punts de busseig</h1>
+          <p class="page-subtitle">${zones.length} punts de busseig registrats</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova zona</button>
       </div>
