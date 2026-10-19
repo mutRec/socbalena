@@ -54,9 +54,11 @@ body {
 
 #app-shell {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  grid-template-rows: auto 1fr;
-  min-height: 100vh;
+  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 #topbar {
@@ -133,6 +135,7 @@ body {
 #main-content {
   padding: 2rem;
   overflow-y: auto;
+  min-width: 0;
   max-width: 1200px;
 }
 
@@ -360,6 +363,48 @@ h3 { font-size: 1.2rem; font-weight: 500; }
 }
 .form-select option { background: var(--color-profund); }
 .form-textarea { resize: vertical; min-height: 90px; }
+.form-textarea-notes { min-height: 180px; }
+.form-hint { font-size: 0.78rem; color: var(--color-gris); line-height: 1.5; }
+.form-hint code, .notes-cos code {
+  background: var(--color-superfic);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.85em;
+  color: var(--color-blanc);
+}
+
+/* Notes amb format lleuger (Markdown mínim) */
+.notes-cos { line-height: 1.7; }
+.notes-cos p { margin: 0 0 0.7rem; }
+.notes-cos > :last-child { margin-bottom: 0; }
+.notes-cos ul, .notes-cos ol { margin: 0.2rem 0 0.7rem; padding-left: 1.4rem; }
+.notes-cos li { margin-bottom: 0.2rem; }
+.notes-cos h4.notes-titol {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-cian);
+  letter-spacing: 0.04em;
+  margin: 1rem 0 0.4rem;
+}
+.notes-cos a { color: var(--color-cian); text-decoration: underline; }
+
+/* Vista prèvia de les notes dins del modal d'edició */
+.notes-vista {
+  border: 1px dashed var(--color-superfic);
+  border-radius: var(--r-sm);
+  padding: 0.75rem;
+  margin-top: 0.25rem;
+}
+.notes-vista-titol {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gris);
+  margin-bottom: 0.4rem;
+}
+.notes-buit { color: var(--color-gris); font-style: italic; }
+
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
 
@@ -424,7 +469,7 @@ tr.clickable { cursor: pointer; }
   flex-direction: column;
   overflow: hidden;
 }
-.modal-xl { max-width: 1000px; }
+.modal-xl { max-width: min(1200px, 96vw); max-height: 92vh; max-height: 92dvh; }
 .modal-header {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--color-superfic);
@@ -562,7 +607,13 @@ tr.clickable { cursor: pointer; }
 /* Fitxa imprimible */
 @media print {
   #topbar, #sidebar, .btn, .no-print { display: none !important; }
-  #app-shell { grid-template-columns: 1fr; }
+  #app-shell {
+    grid-template-columns: 1fr;
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  #main-content { overflow: visible; padding: 0; max-width: 100%; }
   body { background: white; color: black; }
   .fitxa-print { max-width: 100%; }
 }

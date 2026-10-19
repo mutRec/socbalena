@@ -55,6 +55,7 @@ async function enrutarHash() {
 
   const handler = RUTES[ruta];
   if (handler) {
+    mainContent.scrollTop = 0;   // comença a dalt en canviar de pàgina
     mainContent.innerHTML = '<div class="loading"><div class="spinner"></div> Carregant...</div>';
     try {
       await handler(mainContent, id);

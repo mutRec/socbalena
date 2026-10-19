@@ -1,5 +1,6 @@
 // views/immersio-detall.js
 import { api } from '../api.js';
+import { formatNotes } from '../format.js';
 
 export async function renderImmersioDetall(el, id) {
   if (!id) { el.innerHTML = '<div class="alert alert-error">ID no especificat</div>'; return; }
@@ -78,7 +79,7 @@ export async function renderImmersioDetall(el, id) {
         ${i.notes ? `
           <div style="padding:1rem;background:var(--color-profund);border-left:3px solid var(--color-cian);border-radius:0 var(--r-sm) var(--r-sm) 0;">
             <div style="font-size:0.75rem;color:var(--color-gris);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.05em">Notes</div>
-            <p style="line-height:1.7">${escapeHtml(i.notes)}</p>
+            <div class="notes-cos">${formatNotes(i.notes)}</div>
           </div>` : ''}
 
         <!-- Peu de fitxa -->

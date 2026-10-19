@@ -17,11 +17,14 @@
   #app-shell {
     display: block !important;
     grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   #main-content {
     padding: 0 !important;
     max-width: 100% !important;
+    overflow: visible !important;
   }
 
   .page-header { display: none !important; }
@@ -36,6 +39,11 @@
   }
 
   #fitxa h1, #fitxa h2, #fitxa h3 { color: #003366 !important; }
+
+  /* Notes amb format dins la fitxa */
+  #fitxa .notes-cos h4.notes-titol { color: #003366 !important; }
+  #fitxa .notes-cos a { color: #003366 !important; }
+  #fitxa .notes-cos code { background: #e7eef5 !important; color: #111 !important; }
 
   /* Grid de paràmetres en blanc */
   #fitxa [style*="background:var(--color-profund)"] {

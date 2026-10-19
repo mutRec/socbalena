@@ -1,6 +1,7 @@
 // views/immersio-modal.js
 // Modal compartit per crear/editar immersions (usat per la llista i el detall)
 import { api } from '../api.js';
+import { escapeHtml, formatNotes } from '../format.js';
 
 /**
  * Obre el modal de nova/editar immersió.
@@ -184,7 +185,16 @@ export async function obrirModalImmersio(id = null, { onDesat } = {}) {
           </div>
           <div class="form-group">
             <label class="form-label">Notes i observacions</label>
-            <textarea class="form-textarea" name="notes" rows="4">${imm?.notes || ''}</textarea>
+            <textarea class="form-textarea form-textarea-notes" name="notes" rows="7" placeholder="Com va anar la immersió...">${escapeHtml(imm?.notes || '')}</textarea>
+            <div class="form-hint">
+              Format bàsic: <code>**negreta**</code> · <code>*cursiva*</code> · línies que comencen per <code>-</code> fan llista ·
+              <code>1.</code> per numerar · <code>## Títol</code> per subtítol · <code>[text](https://...)</code> per enllaç.
+              Els retorns de línia i els paràgrafs es respecten.
+            </div>
+            <div class="notes-vista">
+              <div class="notes-vista-titol">Vista prèvia</div>
+              <div class="notes-cos" id="notes-preview"></div>
+            </div>
           </div>
         </form>
       </div>
@@ -198,6 +208,15 @@ export async function obrirModalImmersio(id = null, { onDesat } = {}) {
   overlay.querySelector('#tancar-modal').onclick = () => overlay.remove();
   overlay.querySelector('#tancar-modal-2').onclick = () => overlay.remove();
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  // Vista prèvia de les notes (mateix format que a la fitxa de la immersió)
+  const textareaNotes = overlay.querySelector('[name="notes"]');
+  const previewNotes = overlay.querySelector('#notes-preview');
+  const actualitzarPreview = () => {
+    previewNotes.innerHTML = formatNotes(textareaNotes.value) || '<span class="notes-buit">Res a mostrar</span>';
+  };
+  textareaNotes.addEventListener('input', actualitzarPreview);
+  actualitzarPreview();
 
   overlay.querySelector('#desar-imm').addEventListener('click', async () => {
     const form = overlay.querySelector('#form-imm');
