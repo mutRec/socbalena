@@ -26,6 +26,33 @@ app.get('/api/health', (req, res) => res.json({ ok: true, app: 'SócBalena', ts:
 async function migrar(intents = 5) {
   try {
     await pool.query('ALTER TABLE centres ADD COLUMN IF NOT EXISTS logo_url TEXT');
+
+    // Associació N:M entre zones i centres de busseig
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS zona_centres (
+        zona_id UUID NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
+        centre_id UUID NOT NULL REFERENCES centres(id) ON DELETE CASCADE,
+        PRIMARY KEY (zona_id, centre_id)
+      )
+    `);
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_zona_centres_centre ON zona_centres(centre_id)');
+
+    // Migra l'antiga associació única (zones.centre_id) i elimina la columna
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'zones' AND column_name = 'centre_id'
+        ) THEN
+          INSERT INTO zona_centres (zona_id, centre_id)
+          SELECT id, centre_id FROM zones WHERE centre_id IS NOT NULL
+          ON CONFLICT DO NOTHING;
+
+          ALTER TABLE zones DROP COLUMN centre_id;
+        END IF;
+      END $$;
+    `);
   } catch (err) {
     if (intents > 0) {
       console.warn(`Migració ajornada (${err.message}); reintent en 3 s`);

@@ -66,7 +66,11 @@ socbalena/
 │           ├── immersio-modal.js ← Modal compartit crear/editar immersió
 │           ├── immersio-detall.js ← Fitxa detallada + galeria media
 │           ├── centres.js      ← Llista i gestió de centres
+│           ├── centre-modal.js ← Modal compartit crear/editar centre
+│           ├── centre-detall.js ← Fitxa del centre + zones associades
 │           ├── zones.js        ← Llista i gestió de zones
+│           ├── zone-modal.js   ← Modal compartit crear/editar zona (diversos centres)
+│           ├── zone-detall.js  ← Fitxa de la zona + immersions
 │           └── perfil.js       ← Perfil d'usuari
 ├── nginx/
 │   ├── Dockerfile              ← Nginx Alpine
@@ -75,6 +79,7 @@ socbalena/
     ├── crearUsuariApp.sql      ← Script creació nous usuaris
     ├── inserts_immersions.sql  ← Inserció massiva d'immersions
     ├── purgar_dades_taules.sql ← Neteja de taules
+    ├── zona_centres_many_to_many.sql ← Migració zona ↔ diversos centres
     ├── immersions_backup.dump  ← Backup PostgreSQL (format custom)
     └── info-backup-bbdd.txt    ← Instruccions backup/restore
 ```
@@ -82,21 +87,24 @@ socbalena/
 ## Esquema de base de dades
 
 ```
-usuaris (UUID PK) ──────┬──< immersions (UUID PK)
-  · nom                  │     · data, numero_immersio
-  · email (unique)       │     · profunditat_max/mitja, temps_fons
-  · password_hash        │     · pressio_entrada/sortida
-  · rol (admin/bussejador)│    · visibilitat, corrent, onatge
-  · avatar_url           │     · temp_aigua/aire, tipus_vestit
-                         │     · company, instructor, valoracio
-                         │     · tipus_immersio, notes
-                         │           │
-centres (UUID PK) ────< zones        ├──< media (UUID PK)
-  · nom, pais, regio       │          │     · tipus (foto/video)
-  · telefon, email, web    │          │     · nom_fitxer, descripcio
-                           │          │     · es_portada, mida_bytes
-                           └──────────┘     · amplada, alcada
-                         FK               · durada_seg (vídeos)
+usuaris (UUID PK)
+  · nom, email (unique), password_hash, rol, avatar_url
+  │
+  ├──< immersions (UUID PK)
+  │      · data, numero_immersio, zona_id, centre_id
+  │      · profunditat_max/mitja, temps_fons, pressió
+  │      · visibilitat, corrent, onatge, temperatura
+  │      · tipus_vestit, company, instructor, valoracio, notes
+  │      │
+  │      └──< media (UUID PK)
+  │             · tipus (foto/video), nom_fitxer, descripcio
+  │             · es_portada, mida_bytes, amplada, alcada, durada_seg
+  │
+centres (UUID PK) ──< zona_centres >── zones (UUID PK)
+  · nom, pais, regio        · zona_id       · nom, pais, regio
+  · telefon, email, web     · centre_id     · latitud, longitud, tipus
+  · logo_url, notes                         · nivell, profunditat_max
+                                            · descripcio, notes
 ```
 
 **Triggers**: `tr_immersions_updated` actualitza `actualitzat_a` automàticament.
@@ -220,16 +228,18 @@ DELETE /api/centres/:id
 
 ```
 GET    /api/zones
-  Resposta: llista amb centre_nom + num_immersions (comptador)
+  Resposta: llista amb centres: [{ id, nom }] + num_immersions de l'usuari
 
 GET    /api/zones/:id
-  Resposta: zona completa
+  Resposta: zona completa + centres: [{ id, nom }]
+            + immersions de l'usuari: [{ id, numero_immersio, data }]
 
 POST   /api/zones
-  Body: { nom, centre_id?, pais?, regio?, latitud?, longitud?,
+  Body: { nom, centre_ids?: [uuid], pais?, regio?, latitud?, longitud?,
           tipus?, nivell_dificultat?, profunditat_max?, descripcio?, notes? }
 
 PUT    /api/zones/:id
+  Body: igual que POST (substitueix els centres associats)
 DELETE /api/zones/:id
 ```
 
@@ -266,6 +276,7 @@ Els fitxers pujats es serveixen a `/uploads/<usuari_id>/<fitxer>`.
 | `usuaris` | Usuaris amb autenticació bcrypt |
 | `centres` | Directori de centres de busseig |
 | `zones` | Spots de busseig amb coordenades i metadades |
+| `zona_centres` | Associació N:M entre zones i centres |
 | `immersions` | Registres d'immersions (27 camps tècnics) |
 | `media` | Fotos i vídeos associats a immersions |
 
@@ -404,7 +415,9 @@ UPDATE usuaris SET password_hash = '$2b$10$...hash-nou...' WHERE email = 'usuari
 | `#/immersions` | Immersions | Llista paginada + formulari |
 | `#/immersio/:id` | Detall | Fitxa completa + galeria |
 | `#/centres` | Centres | Directori de centres |
+| `#/centre/:id` | Detall del centre | Fitxa + zones associades |
 | `#/zones` | Zones | Directori de zones |
+| `#/zona/:id` | Detall de la zona | Fitxa + centres + immersions |
 | `#/perfil` | Perfil | Perfil d'usuari |
 
 ## Llicència

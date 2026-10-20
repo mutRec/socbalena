@@ -33,7 +33,6 @@ CREATE TABLE centres (
 CREATE TABLE zones (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nom VARCHAR(150) NOT NULL,
-  centre_id UUID REFERENCES centres(id) ON DELETE SET NULL,
   pais VARCHAR(100),
   regio VARCHAR(100),
   latitud NUMERIC(10,6),
@@ -45,6 +44,15 @@ CREATE TABLE zones (
   notes TEXT,
   creat_a TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Associació N:M entre zones i centres (una zona pot pertànyer a diversos centres)
+CREATE TABLE zona_centres (
+  zona_id UUID NOT NULL REFERENCES zones(id) ON DELETE CASCADE,
+  centre_id UUID NOT NULL REFERENCES centres(id) ON DELETE CASCADE,
+  PRIMARY KEY (zona_id, centre_id)
+);
+
+CREATE INDEX idx_zona_centres_centre ON zona_centres(centre_id);
 
 -- Immersions
 CREATE TABLE immersions (

@@ -45,7 +45,9 @@ export async function renderZones(el) {
                   <td>${badgeTipus(z.tipus)}</td>
                   <td>${badgeNivell(z.nivell_dificultat)}</td>
                   <td>${z.profunditat_max ? z.profunditat_max + ' m' : '—'}</td>
-                  <td>${z.centre_nom ? escapeHtml(z.centre_nom) : '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td>${z.centres?.length
+                    ? z.centres.map(c => escapeHtml(c.nom)).join(', ')
+                    : '<span style="color:var(--color-gris)">—</span>'}</td>
                   <td style="color:var(--color-gris);font-size:0.875rem">${[z.regio, z.pais].filter(Boolean).map(escapeHtml).join(', ') || '—'}</td>
                   <td><span class="badge badge-gris">${z.num_immersions || 0}</span></td>
                   <td>
@@ -124,7 +126,7 @@ function targetaZona(z) {
         <span class="targeta-nom">${escapeHtml(z.nom)}</span>
         ${badgeTipus(z.tipus)}
       </div>
-      ${z.centre_nom ? `<div class="targeta-subtit">🏢 ${escapeHtml(z.centre_nom)}</div>` : ''}
+      ${z.centres?.length ? `<div class="targeta-subtit">🏢 ${z.centres.map(c => escapeHtml(c.nom)).join(', ')}</div>` : ''}
       ${lloc ? `<div class="targeta-subtit">📍 ${escapeHtml(lloc)}</div>` : ''}
       <div class="targeta-meta">
         ${z.profunditat_max ? `<span class="targeta-chip">📏 ${z.profunditat_max} m</span>` : ''}

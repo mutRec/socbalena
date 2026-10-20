@@ -22,6 +22,8 @@ export async function renderZoneDetall(el, id) {
     const icona = ICONES_TIPUS[z.tipus] || '📍';
     const lat = formatCoord(z.latitud);
     const lng = formatCoord(z.longitud);
+    const centres = z.centres || [];
+    const immersions = z.immersions || [];
 
     const dades = [
       z.profunditat_max ? { label: '📏 Profunditat màxima', html: `${escapeHtml(z.profunditat_max)} m` } : null,
@@ -30,10 +32,12 @@ export async function renderZoneDetall(el, id) {
         label: '🧭 Coordenades',
         html: [lat, lng].filter(Boolean).map(escapeHtml).join(', ')
       } : null,
-      z.centre_id ? {
-        label: '🏢 Centre',
-        html: `<a href="#/centre/${z.centre_id}">${escapeHtml(z.centre_nom || 'Veure centre')}</a>`
-      } : { label: '🏢 Centre', html: '<span style="color:var(--color-gris)">Sense centre associat</span>' },
+      {
+        label: '🏢 Centres',
+        html: centres.length
+          ? centres.map(c => `<a href="#/centre/${c.id}">${escapeHtml(c.nom)}</a>`).join('<br>')
+          : '<span style="color:var(--color-gris)">Sense centre associat</span>'
+      },
     ].filter(Boolean);
 
     const mapa = (lat && lng)
@@ -101,6 +105,27 @@ export async function renderZoneDetall(el, id) {
           <span>🐋 SócBalena — Zones i punts de busseig</span>
           <span>Alta: ${formatData(z.creat_a)}</span>
         </div>
+      </div>
+
+      <!-- IMMERSIONS EN AQUESTA ZONA -->
+      <div class="card">
+        <div class="galeria-cap">
+          <h3>🤿 Immersions en aquesta zona (${immersions.length})</h3>
+        </div>
+
+        ${immersions.length === 0 ? `
+          <div class="buit" style="padding:2rem">
+            <div class="icon">🤿</div>
+            <p>Encara no has fet cap immersió en aquesta zona.</p>
+          </div>` : `
+          <div class="immersions-zona">
+            ${immersions.map(i => `
+              <a class="immersio-xip" href="#/immersio/${i.id}"
+                 title="Veure la fitxa de la immersió #${i.numero_immersio ?? '—'}">
+                <span class="immersio-xip-num">#${i.numero_immersio ?? '—'}</span>
+                <span class="immersio-xip-data">${formatData(i.data)}</span>
+              </a>`).join('')}
+          </div>`}
       </div>`;
 
     // ── Events ────────────────────────────────────

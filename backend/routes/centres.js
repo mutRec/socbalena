@@ -47,9 +47,9 @@ function rebreLogo(req, res, next) {
 router.get('/', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT c.*, COUNT(z.id) AS num_zones
+      `SELECT c.*, COUNT(zc.zona_id)::int AS num_zones
        FROM centres c
-       LEFT JOIN zones z ON z.centre_id = c.id
+       LEFT JOIN zona_centres zc ON zc.centre_id = c.id
        GROUP BY c.id
        ORDER BY c.nom`
     );
@@ -64,7 +64,13 @@ router.get('/:id', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM centres WHERE id = $1', [req.params.id]);
     if (!rows.length) return res.status(404).json({ error: 'Centre no trobat' });
-    const zones = await pool.query('SELECT * FROM zones WHERE centre_id = $1 ORDER BY nom', [req.params.id]);
+    const zones = await pool.query(
+      `SELECT z.* FROM zones z
+       JOIN zona_centres zc ON zc.zona_id = z.id
+       WHERE zc.centre_id = $1
+       ORDER BY z.nom`,
+      [req.params.id]
+    );
     res.json({ ...rows[0], zones: zones.rows });
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });

@@ -101,7 +101,7 @@ export async function renderCentreDetall(el, id) {
           </div>` : `
           <div class="zones-centre">
             ${zones.map(z => `
-              <div class="zona-centre-fila">
+              <a class="zona-centre-fila" href="#/zona/${z.id}">
                 <div>
                   <div class="zona-centre-nom">${escapeHtml(z.nom)}</div>
                   <div class="zona-centre-meta">
@@ -110,7 +110,7 @@ export async function renderCentreDetall(el, id) {
                   </div>
                 </div>
                 <span class="badge badge-cian">${z.profunditat_max ? z.profunditat_max + ' m' : '—'}</span>
-              </div>`).join('')}
+              </a>`).join('')}
           </div>`}
       </div>`;
 

@@ -313,9 +313,35 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   padding: 0.75rem;
   background: var(--color-profund);
   border-radius: var(--r-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: var(--t);
 }
+.zona-centre-fila:hover { background: var(--color-superfic); }
 .zona-centre-nom { font-weight: 600; }
 .zona-centre-meta { font-size: 0.8rem; color: var(--color-gris); }
+
+/* Immersions fetes en una zona */
+.immersions-zona { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.immersio-xip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--color-profund);
+  border: 1px solid var(--color-superfic);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: var(--t);
+}
+.immersio-xip:hover { border-color: var(--color-cian); box-shadow: var(--shadow-glow); }
+.immersio-xip-num {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-cian);
+}
+.immersio-xip-data { font-size: 0.75rem; color: var(--color-gris); }
 @media (max-width: 768px) {
   .centre-logo.centre-logo-gran { width: 88px; height: 88px; }
   .zona-icona-gran { width: 88px; height: 88px; font-size: 2.5rem; }
@@ -490,6 +516,29 @@ h3 { font-size: 1.2rem; font-weight: 500; }
 .form-textarea { resize: vertical; min-height: 90px; }
 .form-textarea-notes { min-height: 180px; }
 .form-hint { font-size: 0.78rem; color: var(--color-gris); line-height: 1.5; }
+/* Llista de caselles (associar diversos centres) */
+.checkbox-llista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0.6rem;
+  background: var(--color-profund);
+  border: 1px solid var(--color-superfic);
+  border-radius: var(--r-sm);
+}
+.checkbox-opcio {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.35rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.checkbox-opcio:hover { background: var(--color-superfic); }
+.checkbox-opcio input { width: 16px; height: 16px; accent-color: var(--color-cian); }
 .form-hint code, .notes-cos code {
   background: var(--color-superfic);
   border-radius: 4px;

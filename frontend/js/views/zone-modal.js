@@ -21,8 +21,16 @@ export async function obrirModalZona(id = null, { onDesat } = {}) {
     return;
   }
 
-  const optsCentres = centres.map(c =>
-    `<option value="${c.id}">${escapeHtml(c.nom)}</option>`).join('');
+  const associats = new Set((zona?.centres || []).map(c => c.id));
+  if (zona?.centre_id) associats.add(zona.centre_id);
+
+  const checkCentres = centres.length
+    ? centres.map(c => `
+        <label class="checkbox-opcio">
+          <input type="checkbox" name="centre_ids" value="${c.id}" ${associats.has(c.id) ? 'checked' : ''} />
+          <span>${escapeHtml(c.nom)}</span>
+        </label>`).join('')
+    : '<span class="form-hint">No hi ha centres registrats.</span>';
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
@@ -77,18 +85,14 @@ export async function obrirModalZona(id = null, { onDesat } = {}) {
               <input class="form-input" type="number" step="0.000001" name="longitud" placeholder="3.123456" />
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Profunditat màxima (m)</label>
-              <input class="form-input" type="number" step="0.5" name="profunditat_max" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Centre associat</label>
-              <select class="form-select" name="centre_id">
-                <option value="">— Cap —</option>
-                ${optsCentres}
-              </select>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Profunditat màxima (m)</label>
+            <input class="form-input" type="number" step="0.5" name="profunditat_max" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Centres associats</label>
+            <div class="checkbox-llista">${checkCentres}</div>
+            <div class="form-hint">Pots associar la zona a més d'un centre.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Descripció</label>
@@ -121,8 +125,11 @@ export async function obrirModalZona(id = null, { onDesat } = {}) {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
   overlay.querySelector('#desar').addEventListener('click', async () => {
-    const dades = Object.fromEntries(new FormData(overlay.querySelector('#form-zona')));
+    const form = overlay.querySelector('#form-zona');
+    const dades = Object.fromEntries(new FormData(form));
+    delete dades.centre_ids;
     Object.keys(dades).forEach(k => { if (dades[k] === '') dades[k] = null; });
+    dades.centre_ids = [...form.querySelectorAll('input[name="centre_ids"]:checked')].map(i => i.value);
     try {
       if (id) await api.zones.editar(id, dades);
       else     await api.zones.crear(dades);
