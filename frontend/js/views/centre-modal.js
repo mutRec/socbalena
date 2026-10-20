@@ -7,7 +7,17 @@ import { api } from '../api.js';
  * @param {string|number|null} id  ID del centre a editar, o null per crear-ne un de nou.
  * @param {{ onDesat?: Function }} [opcions]  Callback executat després de desar correctament.
  */
-export function obrirModalCentre(id = null, { onDesat } = {}) {
+export async function obrirModalCentre(id = null, { onDesat } = {}) {
+  let centre = null;
+  if (id) {
+    try {
+      centre = await api.centres.obtenir(id);
+    } catch (err) {
+      alert(err.message);
+      return;
+    }
+  }
+
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
@@ -107,16 +117,14 @@ export function obrirModalCentre(id = null, { onDesat } = {}) {
   };
 
   // Precarregar dades si editem
-  if (id) {
-    api.centres.obtenir(id).then(c => {
-      const form = overlay.querySelector('#form-centre');
-      Object.keys(c).forEach(k => {
-        const inp = form.querySelector(`[name="${k}"]`);
-        if (inp && c[k] != null) inp.value = c[k];
-      });
-      logoActual = c.logo_url || null;
-      pintarLogo(logoActual);
+  if (centre) {
+    const form = overlay.querySelector('#form-centre');
+    Object.keys(centre).forEach(k => {
+      const inp = form.querySelector(`[name="${k}"]`);
+      if (inp && centre[k] != null) inp.value = centre[k];
     });
+    logoActual = centre.logo_url || null;
+    pintarLogo(logoActual);
   }
 
   overlay.querySelector('#tancar').onclick = () => overlay.remove();

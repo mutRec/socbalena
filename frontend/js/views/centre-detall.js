@@ -63,19 +63,19 @@ export async function renderCentreDetall(el, id) {
             ${lloc ? `<div style="color:var(--color-gris);margin-bottom:0.5rem;">📍 ${escapeHtml(lloc)}</div>` : ''}
 
             ${dades.length ? `
-              <div class="centre-dades">
+              <div class="detall-dades">
                 ${dades.map(d => `
-                  <div class="centre-dada">
-                    <div class="centre-dada-etiqueta">${d.label}</div>
-                    <div class="centre-dada-valor">${d.html}</div>
+                  <div class="detall-dada">
+                    <div class="detall-dada-etiqueta">${d.label}</div>
+                    <div class="detall-dada-valor">${d.html}</div>
                   </div>`).join('')}
               </div>` : `
               <div class="form-hint" style="margin-top:1rem;">Aquest centre encara no té dades de contacte.</div>`}
           </div>
         </div>
 
-        <div class="centre-notes ${c.notes ? '' : 'centre-notes-buit'}">
-          <div class="centre-notes-titol">Notes</div>
+        <div class="detall-notes ${c.notes ? '' : 'detall-notes-buit'}">
+          <div class="detall-notes-titol">Notes</div>
           ${c.notes
             ? `<div class="notes-cos">${formatNotes(c.notes)}</div>`
             : '<div>Encara no hi ha notes per a aquest centre.</div>'}

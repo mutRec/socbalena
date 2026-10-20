@@ -8,6 +8,7 @@ import { renderImmersioDetall } from './views/immersio-detall.js';
 import { renderCentres } from './views/centres.js';
 import { renderCentreDetall } from './views/centre-detall.js';
 import { renderZones } from './views/zones.js';
+import { renderZoneDetall } from './views/zone-detall.js';
 import { renderPerfil } from './views/perfil.js';
 
 // ── Estat global ────────────────────────────────────────
@@ -32,6 +33,7 @@ const RUTES = {
   '/centres':      renderCentres,
   '/centre':       renderCentreDetall,     // /centre/:id
   '/zones':        renderZones,
+  '/zona':         renderZoneDetall,       // /zona/:id
   '/perfil':       renderPerfil,
 };
 
@@ -47,8 +49,8 @@ async function enrutarHash() {
   // Tancar el menú mòbil en navegar
   document.body.classList.remove('menu-obert');
 
-  // Actualitzar nav actiu (el detall d'un centre manté actiu "Centres")
-  const rutaNav = ruta === '/centre' ? '/centres' : ruta;
+  // Actualitzar nav actiu (el detall d'un centre o d'una zona manté actiu el seu menú)
+  const rutaNav = { '/centre': '/centres', '/zona': '/zones' }[ruta] || ruta;
   document.querySelectorAll('.nav-link').forEach(el => {
     el.classList.toggle('actiu', el.dataset.route === rutaNav || (rutaNav === '/' && el.dataset.route === '/'));
   });
