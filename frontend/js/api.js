@@ -41,6 +41,7 @@ export const api = {
   // Immersions
   immersions: {
     llista:   (params = {}) => req('GET', '/immersions?' + new URLSearchParams(params)),
+    opcions:  ()            => req('GET', '/immersions/opcions'),
     obtenir:  (id)          => req('GET', `/immersions/${id}`),
     crear:    (dades)       => req('POST', '/immersions', dades),
     editar:   (id, dades)   => req('PUT', `/immersions/${id}`, dades),

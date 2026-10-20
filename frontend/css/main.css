@@ -167,6 +167,7 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   margin-bottom: 1rem;
 }
 .barra-filtres .form-input { flex: 1; min-width: 220px; max-width: 420px; }
+.barra-filtres .selector-salt { flex: 0 1 320px; min-width: 220px; max-width: 380px; }
 .paginacio {
   display: flex;
   align-items: center;

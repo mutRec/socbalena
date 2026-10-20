@@ -193,6 +193,10 @@ GET    /api/immersions
   Resposta: { total, pagina, immersions: [...] }
   Nota: q cerca per nom de zona, número d'immersió o data (DD/MM/YYYY o YYYY-MM-DD)
 
+GET    /api/immersions/opcions
+  Resposta: llista lleugera [{ id, numero_immersio, data, zona_nom }]
+            per al selector de navegació ràpida
+
 GET    /api/immersions/:id
   Resposta: immersió completa + media: [...]
 

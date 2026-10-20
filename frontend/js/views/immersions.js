@@ -29,6 +29,9 @@ export async function renderImmersions(el, id) {
         <input class="form-input" id="filtre-imm" type="search"
                placeholder="🔍 Cercar per zona, núm. o data..."
                value="${escapeAttr(filtre)}" />
+        <select class="form-select selector-salt" id="salt-imm" aria-label="Anar a una immersió">
+          <option value="">Anar a una immersió…</option>
+        </select>
         <div class="paginacio" id="paginacio-top"></div>
       </div>
 
@@ -37,7 +40,7 @@ export async function renderImmersions(el, id) {
       <div class="paginacio" id="paginacio-bot" style="margin-top:1.5rem"></div>
     `;
 
-    el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModalImmersio(null, { onDesat: renderResultats }));
+    el.querySelector('#btn-nova')?.addEventListener('click', () => obrirModalImmersio(null, { onDesat: refrescar }));
 
     const input = el.querySelector('#filtre-imm');
     input.addEventListener('input', () => {
@@ -45,6 +48,35 @@ export async function renderImmersions(el, id) {
       clearTimeout(temporitzador);
       temporitzador = setTimeout(() => { pagina = 1; renderResultats(); }, 300);
     });
+
+    const select = el.querySelector('#salt-imm');
+    select.addEventListener('change', () => {
+      if (select.value) window.location.hash = `/immersio/${select.value}`;
+    });
+  }
+
+  // ── Selector per saltar directament a una immersió ──
+  async function carregarSelector() {
+    const select = el.querySelector('#salt-imm');
+    if (!select) return;
+    try {
+      const opcions = await api.immersions.opcions();
+      select.innerHTML = `
+        <option value="">Anar a una immersió (${opcions.length})…</option>
+        ${opcions.map(i => {
+          const num = i.numero_immersio != null ? `#${i.numero_immersio}` : 'Sense núm.';
+          const etiqueta = [num, formatData(i.data), i.zona_nom].filter(Boolean).join(' · ');
+          return `<option value="${i.id}">${escapeAttr(etiqueta)}</option>`;
+        }).join('')}`;
+    } catch {
+      select.innerHTML = '<option value="">No s\'han pogut carregar les immersions</option>';
+    }
+  }
+
+  // Refresca resultats i selector després de crear, editar o eliminar
+  function refrescar() {
+    renderResultats();
+    carregarSelector();
   }
 
   // ── Paginació (es pinta a dalt i a baix) ──
@@ -151,7 +183,7 @@ export async function renderImmersions(el, id) {
         e.stopPropagation();
         if (!confirm('Eliminar aquesta immersió i totes les seves fotos?')) return;
         await api.immersions.eliminar(btn.dataset.id);
-        renderResultats();
+        refrescar();
       });
     });
 
@@ -160,15 +192,15 @@ export async function renderImmersions(el, id) {
 
   // Escoltar event de l'inici
   window.addEventListener('obrirNovaImmersio', () => {
-    if (el.querySelector('#btn-nova')) obrirModalImmersio(null, { onDesat: renderResultats });
+    if (el.querySelector('#btn-nova')) obrirModalImmersio(null, { onDesat: refrescar });
   }, { once: true });
 
   pintarEstructura();
-  await renderResultats();
+  await Promise.all([renderResultats(), carregarSelector()]);
 
   // Ruta per crear una nova immersió (des del dashboard)
   if (id === 'nova') {
-    obrirModalImmersio(null, { onDesat: renderResultats });
+    obrirModalImmersio(null, { onDesat: refrescar });
     history.replaceState(null, '', '#/immersions');
   }
 }

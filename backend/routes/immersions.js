@@ -110,6 +110,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/immersions/opcions — llista lleugera per al selector de navegació ràpida
+router.get('/opcions', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT i.id, i.numero_immersio, i.data, z.nom AS zona_nom
+       FROM immersions i
+       LEFT JOIN zones z ON z.id = i.zona_id
+       WHERE i.usuari_id = $1
+       ORDER BY i.numero_immersio DESC NULLS LAST, i.data DESC`,
+      [req.usuari.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 // GET /api/immersions/:id
 router.get('/:id', async (req, res) => {
   try {
