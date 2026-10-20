@@ -30,7 +30,7 @@ export async function renderImmersions(el, id) {
                placeholder="🔍 Cercar per zona, núm. o data..."
                value="${escapeAttr(filtre)}" />
         <select class="form-select selector-salt" id="salt-imm" aria-label="Anar a una immersió">
-          <option value="">Anar a una immersió…</option>
+          <option value="">Tria una immersió…</option>
         </select>
         <div class="paginacio" id="paginacio-top"></div>
       </div>
@@ -62,7 +62,7 @@ export async function renderImmersions(el, id) {
     try {
       const opcions = await api.immersions.opcions();
       select.innerHTML = `
-        <option value="">Anar a una immersió (${opcions.length})…</option>
+        <option value="">Tria una immersió (${opcions.length})…</option>
         ${opcions.map(i => {
           const num = i.numero_immersio != null ? `#${i.numero_immersio}` : 'Sense núm.';
           const etiqueta = [num, formatData(i.data), i.zona_nom].filter(Boolean).join(' · ');
