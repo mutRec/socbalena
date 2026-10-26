@@ -13,7 +13,7 @@ export async function renderCentres(el) {
         <div class="page-title">
           <h1>Centres de busseig</h1>
            <p class="page-subtitle">${centres.length} centres registrats</p>
-           <p class="page-subtitle">Detalls dels centres de busseig dels que s'han visitat.</p>
+           <p class="page-subtitle">Detalls dels centres de busseig dels que s'han visitat en alguna de les immersions.</p>
         </div>
         <button class="btn btn-primary" id="btn-nou">+ Nou centre</button>
       </div>
