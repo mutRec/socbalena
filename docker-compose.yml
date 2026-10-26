@@ -37,7 +37,6 @@ services:
     ports:
       - "8085:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html:ro
       - uploads:/usr/share/nginx/uploads:ro
     depends_on:
       - backend
