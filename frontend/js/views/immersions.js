@@ -21,6 +21,7 @@ export async function renderImmersions(el, id) {
         <div class="page-title">
           <h1>Immersions</h1>
           <p class="page-subtitle" id="subtitol-imm">Carregant...</p>
+          <p class="page-subtitle" id="subtitol-imm">Totes les immersions realitzades ja sigui desde un centre de busseig o per lliure.</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova immersió</button>
       </div>
