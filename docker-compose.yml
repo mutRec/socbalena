@@ -32,13 +32,12 @@ services:
         condition: service_healthy
 
   frontend:
-    build: 
-      context: .
-      dockerfile: ./nginx/Dockerfile
+    build: ./nginx
     restart: unless-stopped
     ports:
-      - "8085:80"  # Exposem el port 8085 del Host cap a NPM
+      - "8085:80"
     volumes:
+      - ./frontend:/usr/share/nginx/html:ro
       - uploads:/usr/share/nginx/uploads:ro
     depends_on:
       - backend
