@@ -18,6 +18,10 @@ export async function renderZones(el) {
         <button class="btn btn-primary" id="btn-nova">+ Nova zona</button>
       </div>
 
+      <div style="margin-bottom:1rem;text-align:left;">
+        <input type="text" id="cerca-zones" placeholder="🔍 Cerca zona..." style="width:280px;padding:0.5rem 0.75rem;border:1px solid var(--color-superfic);border-radius:var(--r-sm);background:var(--color-fons-clara);color:var(--color-text);font-size:0.9rem;" />
+      </div>
+
       ${zones.length === 0 ? `
         <div class="buit">
           <div class="icon">🗺️</div>
@@ -39,9 +43,9 @@ export async function renderZones(el) {
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="cos-taula-zones">
               ${zones.map(z => `
-                <tr class="clickable" data-id="${z.id}">
+                <tr class="clickable" data-id="${z.id}" data-nom="${escapeHtml(z.nom).toLowerCase()}">
                   <td><strong>${escapeHtml(z.nom)}</strong></td>
                   <td>${badgeTipus(z.tipus)}</td>
                   <td>${badgeNivell(z.nivell_dificultat)}</td>
@@ -73,6 +77,19 @@ export async function renderZones(el) {
         window.location.hash = `/zona/${tr.dataset.id}`;
       });
     });
+
+    // Filtrat per cerca
+    const cercaInput = el.querySelector('#cerca-zones');
+    if (cercaInput) {
+      cercaInput.addEventListener('input', (e) => {
+        const terme = e.target.value.toLowerCase();
+        const files = el.querySelectorAll('#cos-taula-zones tr.clickable');
+        files.forEach(f => {
+          const nom = f.dataset.nom || '';
+          f.style.display = nom.includes(terme) ? '' : 'none';
+        });
+      });
+    }
 
     el.querySelectorAll('.wrapper-mobil .targeta').forEach(card => {
       const obrir = () => { window.location.hash = `/zona/${card.dataset.id}`; };
@@ -108,8 +125,7 @@ export async function renderZones(el) {
 
 function badgeTipus(t) {
   if (!t) return '<span style="color:var(--color-gris)">—</span>';
-  const icons = { escull:'🪸', paret:'🏔️', cova:'🕳️', derelicte:'⚓', platja:'🏖️', llac:'🏞️', riu:'🌊', altre:'📍' };
-  return `<span class="badge badge-gris">${icons[t]||''} ${t}</span>`;
+  return `<span class="badge badge-gris">${t}</span>`;
 }
 
 function badgeNivell(n) {

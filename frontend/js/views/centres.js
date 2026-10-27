@@ -4,7 +4,7 @@ import { escapeHtml } from '../format.js';
 import { obrirModalCentre } from './centre-modal.js';
 
 export async function renderCentres(el) {
-  async function renderLlista() {
+  async function renderLlista(filtra = true) {
     el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     const centres = await api.centres.llista();
 
@@ -18,52 +18,82 @@ export async function renderCentres(el) {
         <button class="btn btn-primary" id="btn-nou">+ Nou centre</button>
       </div>
 
+      <div style="margin-bottom:1rem;text-align:left;">
+        <input type="text" id="cerca-centres" placeholder="🔍 Cerca centre..." style="width:280px;padding:0.5rem 0.75rem;border:1px solid var(--color-superfic);border-radius:var(--r-sm);background:var(--color-fons-clara);color:var(--color-text);font-size:0.9rem;" />
+      </div>
+
       ${centres.length === 0 ? `
         <div class="buit">
           <div class="icon">🏢</div>
           <h3>Sense centres</h3>
           <p>Afegeix el primer centre de busseig</p>
         </div>` : `
-        <div class="grid-cards" id="grid-centres">
-          ${centres.map(c => `
-            <article class="card clicable" data-id="${c.id}" role="link" tabindex="0"
-                     aria-label="Veure el centre ${escapeHtml(c.nom)}">
-              <div class="centre-cap">
-                <h3>${escapeHtml(c.nom)}</h3>
-                <div style="display:flex;gap:0.25rem">
-                  <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}" title="Editar">✏️</button>
-                  <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${c.id}" title="Eliminar">🗑️</button>
-                </div>
-              </div>
-              <div class="centre-cos">
-                <div class="centre-info">
-                  ${c.pais || c.regio ? `<div class="centre-linia">📍 ${[c.regio, c.pais].filter(Boolean).map(escapeHtml).join(', ')}</div>` : ''}
-                  ${c.telefon ? `<div class="centre-linia">📞 ${escapeHtml(c.telefon)}</div>` : ''}
-                  ${c.email ? `<div class="centre-linia">✉️ ${escapeHtml(c.email)}</div>` : ''}
-                  ${c.web ? `<div class="centre-linia"><a href="${escapeHtml(c.web)}" target="_blank" rel="noopener noreferrer" style="color:var(--color-cian)">${escapeHtml(c.web)}</a></div>` : ''}
-                  <div class="centre-peu">
-                    <span class="badge badge-cian">${c.num_zones || 0} zones</span>
-                  </div>
-                </div>
-                <div class="centre-logo">
-                  ${c.logo_url
-                    ? `<img src="${escapeHtml(c.logo_url)}" alt="Logotip de ${escapeHtml(c.nom)}" loading="lazy" />`
-                    : `<span class="centre-logo-buit" title="Sense logotip">🏢</span>`}
-                </div>
-              </div>
-            </article>`).join('')}
+        <div class="wrapper-desktop">
+        <div class="taula-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Ubicació</th>
+                <th>Contacte</th>
+                <th>Web</th>
+                <th>Zones</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cos-taula-centres">
+              ${centres.map(c => `
+                <tr class="clickable" data-id="${c.id}" data-nom="${escapeHtml(c.nom).toLowerCase()}">
+                  <td><strong>${escapeHtml(c.nom)}</strong>${c.logo_url ? `<img src="${escapeHtml(c.logo_url)}" alt="" style="width:28px;height:28px;vertical-align:middle;margin-left:0.5rem;border-radius:4px;" />` : ''}</td>
+                  <td style="color:var(--color-gris);font-size:0.875rem">${[c.regio, c.pais].filter(Boolean).map(escapeHtml).join(', ') || '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td style="font-size:0.875rem">${[c.telefon ? '📞 '+escapeHtml(c.telefon) : '', c.email ? '✉️ '+escapeHtml(c.email) : ''].filter(Boolean).join('<br>') || '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td>${c.web ? `<a href="${escapeHtml(c.web)}" target="_blank" rel="noopener noreferrer" style="color:var(--color-cian);font-size:0.875rem">${escapeHtml(c.web)}</a>` : '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td><span class="badge badge-cian">${c.num_zones || 0}</span></td>
+                  <td>
+                    <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}">✏️</button>
+                    <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${c.id}">🗑️</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        </div>
+        <div class="wrapper-mobil">
+          <div class="grid-targetes">
+            ${centres.map(targetaCentre).join('')}
+          </div>
         </div>`}`;
 
-    // Cada targeta obre la pàgina completa del centre
-    el.querySelectorAll('.card.clicable').forEach(card => {
+    // Filtrat per cerca
+    const cercaInput = el.querySelector('#cerca-centres');
+    if (cercaInput) {
+      cercaInput.addEventListener('input', (e) => {
+        const terme = e.target.value.toLowerCase();
+        const files = el.querySelectorAll('#cos-taula-centres tr.clickable');
+        files.forEach(f => {
+          const nom = f.dataset.nom || '';
+          f.style.display = nom.includes(terme) ? '' : 'none';
+        });
+      });
+    }
+
+    // Files i targetes obren la pàgina completa del centre
+    el.querySelectorAll('tr.clickable').forEach(tr => {
+      tr.addEventListener('click', (e) => {
+        if (e.target.closest('button, a')) return;
+        window.location.hash = `/centre/${tr.dataset.id}`;
+      });
+    });
+
+    el.querySelectorAll('.wrapper-mobil .targeta').forEach(card => {
       const obrir = () => { window.location.hash = `/centre/${card.dataset.id}`; };
       card.addEventListener('click', (e) => {
-        if (e.target.closest('a, button')) return;
+        if (e.target.closest('button, a')) return;
         obrir();
       });
       card.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
-        if (e.target.closest('a, button')) return;
+        if (e.target.closest('button, a')) return;
         e.preventDefault();
         obrir();
       });
@@ -82,6 +112,31 @@ export async function renderCentres(el) {
         await api.centres.eliminar(btn.dataset.id);
         renderLlista();
       }));
+  }
+
+  function targetaCentre(c) {
+    const lloc = [c.regio, c.pais].filter(Boolean).join(', ');
+    return `
+      <article class="targeta" data-id="${c.id}" role="link" tabindex="0"
+               aria-label="Veure el centre ${escapeHtml(c.nom)}">
+        <div class="targeta-cap">
+          <span class="targeta-nom">${escapeHtml(c.nom)}</span>
+        </div>
+        ${lloc ? `<div class="targeta-subtit">📍 ${escapeHtml(lloc)}</div>` : ''}
+        ${c.telefon ? `<div class="targeta-subtit">📞 ${escapeHtml(c.telefon)}</div>` : ''}
+        ${c.email ? `<div class="targeta-subtit">✉️ ${escapeHtml(c.email)}</div>` : ''}
+        ${c.web ? `<div class="targeta-subtit"><a href="${escapeHtml(c.web)}" target="_blank" rel="noopener" style="color:var(--color-cian)">${escapeHtml(c.web)}</a></div>` : ''}
+        <div class="targeta-meta">
+          <span class="badge badge-cian">${c.num_zones || 0} zones</span>
+        </div>
+        <div class="targeta-accions" style="justify-content:space-between;align-items:center">
+          <span></span>
+          <div style="display:flex;gap:0.25rem">
+            <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}" title="Editar">✏️</button>
+            <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${c.id}" title="Eliminar">🗑️</button>
+          </div>
+        </div>
+      </article>`;
   }
 
   await renderLlista();
