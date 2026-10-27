@@ -3,16 +3,20 @@ import { api } from '../api.js';
 import { escapeHtml } from '../format.js';
 import { obrirModalZona } from './zone-modal.js';
 
+let zonesOrdenades = [];
+let ordreDesc = true;
+
 export async function renderZones(el) {
   async function renderLlista() {
     el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     const zones = await api.zones.llista();
+    zonesOrdenades = [...zones];
 
     el.innerHTML = `
       <div class="page-header">
         <div class="page-title">
           <h1>Zones i punts de busseig</h1>
-          <p class="page-subtitle">${zones.length} punts de busseig registrats</p>
+          <p class="page-subtitle">${zonesOrdenades.length} punts de busseig registrats</p>
           <p class="page-subtitle">Punts de busseig i zones de tot el litoral català on s'ha practicat alguna immersió.</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova zona</button>
@@ -22,7 +26,7 @@ export async function renderZones(el) {
         <input type="text" id="cerca-zones" placeholder="🔍 Cerca zona..." style="width:280px;padding:0.5rem 0.75rem;border:1px solid var(--color-superfic);border-radius:var(--r-sm);background:var(--color-fons-clara);color:var(--color-text);font-size:0.9rem;" />
       </div>
 
-      ${zones.length === 0 ? `
+      ${zonesOrdenades.length === 0 ? `
         <div class="buit">
           <div class="icon">🗺️</div>
           <h3>Sense zones</h3>
@@ -36,15 +40,15 @@ export async function renderZones(el) {
                 <th>Nom</th>
                 <th>Tipus</th>
                 <th>Nivell</th>
-                <th>Prof. màx</th>
+                <th style="white-space:nowrap;">Prof. màx</th>
                 <th>Centre</th>
                 <th>País / Regió</th>
-                <th>Immersions</th>
+                <th id="th-immersions" style="cursor:pointer;user-select:none;white-space:nowrap;" title="Clicar per ordenar">Immersions ↕</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="cos-taula-zones">
-              ${zones.map(z => `
+              ${zonesOrdenades.map(z => `
                 <tr class="clickable" data-id="${z.id}" data-nom="${escapeHtml(z.nom).toLowerCase()}">
                   <td><strong>${escapeHtml(z.nom)}</strong></td>
                   <td>${badgeTipus(z.tipus)}</td>
@@ -66,9 +70,24 @@ export async function renderZones(el) {
         </div>
         <div class="wrapper-mobil">
           <div class="grid-targetes">
-            ${zones.map(targetaZona).join('')}
+            ${zonesOrdenades.map(targetaZona).join('')}
           </div>
         </div>`}`;
+
+    // Actualitzar subtítol amb total
+    const subtitle = el.querySelector('.page-subtitle');
+    if (subtitle) {
+      subtitle.textContent = `${zonesOrdenades.length} punts de busseig registrats`;
+    }
+
+    // Ordenació per nombre d'immersions
+    const thImmersion = el.querySelector('#th-immersions');
+    if (thImmersion) {
+      thImmersion.addEventListener('click', () => {
+        ordreDesc = !ordreDesc;
+        reordenarIAplicar();
+      });
+    }
 
     // Files i targetes obren la pàgina completa de la zona
     el.querySelectorAll('tr.clickable').forEach(tr => {
@@ -121,6 +140,52 @@ export async function renderZones(el) {
   }
 
   await renderLlista();
+}
+
+function reordenarIAplicar() {
+  zonesOrdenades.sort((a, b) => {
+    const va = a.num_immersions || 0;
+    const vb = b.num_immersions || 0;
+    return ordreDesc ? vb - va : va - vb;
+  });
+  const thImmersion = document.querySelector('#th-immersions');
+  if (thImmersion) {
+    thImmersion.innerHTML = ordreDesc
+      ? 'Immersions ▲'
+      : 'Immersions ▼';
+  }
+  // Rebuild tbody rows in sorted order
+  const tbody = document.querySelector('#cos-taula-zones');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  zonesOrdenades.forEach(z => {
+    const tr = document.createElement('tr');
+    tr.className = 'clickable';
+    tr.dataset.id = z.id;
+    tr.dataset.nom = escapeHtml(z.nom).toLowerCase();
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(z.nom)}</strong></td>
+      <td>${badgeTipus(z.tipus)}</td>
+      <td>${badgeNivell(z.nivell_dificultat)}</td>
+      <td>${z.profunditat_max ? z.profunditat_max + ' m' : '—'}</td>
+      <td>${z.centres?.length
+        ? z.centres.map(c => escapeHtml(c.nom)).join(', ')
+        : '<span style="color:var(--color-gris)">—</span>'}</td>
+      <td style="color:var(--color-gris);font-size:0.875rem">${[z.regio, z.pais].filter(Boolean).map(escapeHtml).join(', ') || '—'}</td>
+      <td><span class="badge badge-gris">${z.num_immersions || 0}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm btn-editar" data-id="${z.id}">✏️</button>
+        <button class="btn btn-ghost btn-sm btn-eliminar" data-id="${z.id}">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  // Reattach click events
+  tbody.querySelectorAll('tr.clickable').forEach(tr => {
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('button, a')) return;
+      window.location.hash = `/zona/${tr.dataset.id}`;
+    });
+  });
 }
 
 function badgeTipus(t) {
