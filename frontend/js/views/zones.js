@@ -13,6 +13,7 @@ export async function renderZones(el) {
         <div class="page-title">
           <h1>Zones i punts de busseig</h1>
           <p class="page-subtitle">${zones.length} punts de busseig registrats</p>
+          <p class="page-subtitle">Punts de busseig i zones de tot el litoral català on s'ha practicat alguna immersió.</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova zona</button>
       </div>
