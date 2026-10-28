@@ -2,6 +2,7 @@
 import { api } from '../api.js';
 import { escapeHtml } from '../format.js';
 import { obrirModalZona } from './zone-modal.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 let zonesOrdenades = [];
 let ordreDesc = true;
@@ -133,9 +134,31 @@ export async function renderZones(el) {
     el.querySelectorAll('.btn-eliminar').forEach(btn =>
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (!confirm('Eliminar aquesta zona?')) return;
-        await api.zones.eliminar(btn.dataset.id);
-        renderLlista();
+
+        const zona = zonesOrdenades.find(z => String(z.id) === String(btn.dataset.id));
+        const numImm = zona?.num_immersions || 0;
+        const numCentres = zona?.centres?.length || 0;
+
+        const eliminada = await obrirConfirmacio({
+          titol: 'Eliminar la zona',
+          missatge: zona?.nom
+            ? `Estàs a punt d'eliminar la zona «${zona.nom}».`
+            : 'Estàs a punt d\'eliminar aquesta zona.',
+          detalls: [
+            numImm
+              ? `Les ${numImm} ${numImm === 1 ? 'immersió registrada es conservarà' : 'immersions registrades es conservaran'}, però sense zona assignada.`
+              : null,
+            numCentres
+              ? `Es desvincularà ${numCentres === 1 ? 'del centre associat' : `dels ${numCentres} centres associats`}.`
+              : null,
+            'Aquesta acció no es pot desfer.'
+          ].filter(Boolean),
+          textConfirmar: 'Eliminar',
+          textEnCurs: 'Eliminant…',
+          onConfirmar: () => api.zones.eliminar(btn.dataset.id)
+        });
+
+        if (eliminada) await renderLlista();
       }));
   }
 

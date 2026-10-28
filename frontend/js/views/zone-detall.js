@@ -2,6 +2,7 @@
 import { api } from '../api.js';
 import { escapeHtml, formatNotes } from '../format.js';
 import { obrirModalZona } from './zone-modal.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 const ICONES_TIPUS = {
   escull: '🪸', paret: '🏔️', cova: '🕳️', derelicte: '⚓',
@@ -136,9 +137,23 @@ export async function renderZoneDetall(el, id) {
     };
 
     el.querySelector('#btn-eliminar').onclick = async () => {
-      if (!confirm('Eliminar aquesta zona?')) return;
-      await api.zones.eliminar(id);
-      window.location.hash = '/zones';
+      const eliminada = await obrirConfirmacio({
+        titol: 'Eliminar la zona',
+        missatge: `Estàs a punt d'eliminar la zona «${z.nom}».`,
+        detalls: [
+          immersions.length
+            ? `Les ${immersions.length} ${immersions.length === 1 ? 'immersió registrada es conservarà' : 'immersions registrades es conservaran'}, però sense zona assignada.`
+            : null,
+          centres.length
+            ? `Es desvincularà ${centres.length === 1 ? 'del centre associat' : `dels ${centres.length} centres associats`}.`
+            : null,
+          'Aquesta acció no es pot desfer.'
+        ].filter(Boolean),
+        textConfirmar: 'Eliminar',
+        textEnCurs: 'Eliminant…',
+        onConfirmar: () => api.zones.eliminar(id)
+      });
+      if (eliminada) window.location.hash = '/zones';
     };
   }
 

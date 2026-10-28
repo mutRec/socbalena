@@ -1,6 +1,7 @@
 // views/immersio-detall.js
 import { api } from '../api.js';
 import { formatNotes } from '../format.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 export async function renderImmersioDetall(el, id) {
   if (!id) { el.innerHTML = '<div class="alert alert-error">ID no especificat</div>'; return; }
@@ -156,9 +157,22 @@ export async function renderImmersioDetall(el, id) {
     });
     el.querySelectorAll('.btn-eliminar-media').forEach(btn => {
       btn.onclick = async () => {
-        if (!confirm('Eliminar aquest fitxer?')) return;
-        await api.media.eliminar(btn.dataset.id);
-        carregar();
+        const fitxer = (i.media || []).find(m => String(m.id) === String(btn.dataset.id));
+        const tipus = fitxer?.tipus === 'video' ? 'el vídeo' : 'la foto';
+        const nom = fitxer?.descripcio
+          ? `«${fitxer.descripcio}»`
+          : fitxer?.nom_fitxer ? `«${fitxer.nom_fitxer}»` : '';
+
+        const eliminat = await obrirConfirmacio({
+          titol: `Eliminar ${tipus}`,
+          missatge: `Estàs a punt d'eliminar ${tipus}${nom ? ' ' + nom : ''} d'aquesta immersió.`,
+          detalls: ['El fitxer s\'esborrarà del servidor i no es podrà recuperar.'],
+          textConfirmar: 'Eliminar',
+          textEnCurs: 'Eliminant…',
+          onConfirmar: () => api.media.eliminar(btn.dataset.id)
+        });
+
+        if (eliminat) await carregar();
       };
     });
 

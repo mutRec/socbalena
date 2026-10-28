@@ -2,6 +2,7 @@
 import { api } from '../api.js';
 import { escapeHtml, formatNotes } from '../format.js';
 import { obrirModalCentre } from './centre-modal.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 export async function renderCentreDetall(el, id) {
   if (!id) { el.innerHTML = '<div class="alert alert-error">ID no especificat</div>'; return; }
@@ -122,9 +123,21 @@ export async function renderCentreDetall(el, id) {
     };
 
     el.querySelector('#btn-eliminar').onclick = async () => {
-      if (!confirm('Eliminar aquest centre?')) return;
-      await api.centres.eliminar(id);
-      window.location.hash = '/centres';
+      const eliminat = await obrirConfirmacio({
+        titol: 'Eliminar el centre',
+        missatge: `Estàs a punt d'eliminar el centre «${c.nom}».`,
+        detalls: [
+          zones.length
+            ? `Les ${zones.length} ${zones.length === 1 ? 'zona associada es desvincularà' : 'zones associades es desvincularan'} d'aquest centre.`
+            : null,
+          'Les immersions registrades es conservaran, però quedaran sense centre.',
+          'Aquesta acció no es pot desfer.'
+        ].filter(Boolean),
+        textConfirmar: 'Eliminar',
+        textEnCurs: 'Eliminant…',
+        onConfirmar: () => api.centres.eliminar(id)
+      });
+      if (eliminat) window.location.hash = '/centres';
     };
   }
 

@@ -1,6 +1,7 @@
 // views/immersions.js
 import { api } from '../api.js';
 import { obrirModalImmersio } from './immersio-modal.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 export async function renderImmersions(el, id) {
   let pagina = 1;
@@ -21,7 +22,7 @@ export async function renderImmersions(el, id) {
         <div class="page-title">
           <h1>Immersions</h1>
           <p class="page-subtitle" id="subtitol-imm">Carregant...</p>
-          <p class="page-subtitle" id="subtitol-imm">Totes les immersions realitzades ja sigui desde un centre de busseig o per lliure.</p>
+          <p class="page-subtitle">Totes les immersions realitzades ja sigui desde un centre de busseig o per lliure.</p>
         </div>
         <button class="btn btn-primary" id="btn-nova">+ Nova immersió</button>
       </div>
@@ -182,8 +183,32 @@ export async function renderImmersions(el, id) {
     el.querySelectorAll('.btn-eliminar').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (!confirm('Eliminar aquesta immersió i totes les seves fotos?')) return;
-        await api.immersions.eliminar(btn.dataset.id);
+
+        const imm = immersions.find(x => String(x.id) === String(btn.dataset.id));
+        const etiqueta = imm?.numero_immersio != null
+          ? `la immersió #${imm.numero_immersio}`
+          : 'aquesta immersió';
+        const context = [
+          imm?.data ? `del ${formatData(imm.data)}` : null,
+          imm?.zona_nom ? `a ${imm.zona_nom}` : null
+        ].filter(Boolean).join(' ');
+
+        const eliminada = await obrirConfirmacio({
+          titol: 'Eliminar la immersió',
+          missatge: `Estàs a punt d'eliminar ${etiqueta}${context ? ' ' + context : ''}.`,
+          detalls: [
+            'També s\'eliminaran totes les fotos i vídeos associats.',
+            'Aquesta acció no es pot desfer.'
+          ],
+          textConfirmar: 'Eliminar',
+          textEnCurs: 'Eliminant…',
+          onConfirmar: () => api.immersions.eliminar(btn.dataset.id)
+        });
+
+        if (!eliminada) return;
+
+        // Si era l'últim element de la pàgina, retrocedim per no quedar-nos en una pàgina buida
+        if (immersions.length === 1 && pagina > 1) pagina -= 1;
         refrescar();
       });
     });

@@ -1,6 +1,7 @@
 // views/perfil.js
 import { api } from '../api.js';
 import { store, pintarAvatar } from '../app.js';
+import { obrirConfirmacio } from './confirm-modal.js';
 
 export async function renderPerfil(el) {
   const u = await api.perfil();
@@ -110,15 +111,22 @@ export async function renderPerfil(el) {
   });
 
   btnTreure.onclick = async () => {
-    if (!confirm('Treure la foto de perfil?')) return;
-    try {
-      await api.eliminarAvatar();
-      store.usuari.avatar_url = null;
-      refrescarAvatars();
-      alertAvatar.innerHTML = '<div class="alert alert-ok">✓ Foto eliminada</div>';
-    } catch (err) {
-      alertAvatar.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
-    }
+    // Si l'API falla, el diàleg mostra l'error i roman obert per reintentar
+    await obrirConfirmacio({
+      titol: 'Treure la foto de perfil',
+      missatge: 'S\'eliminarà la foto de perfil del teu compte.',
+      detalls: ['Tornaràs a mostrar la inicial del teu nom.'],
+      textConfirmar: 'Treure',
+      textEnCurs: 'Traient…',
+      perill: true,
+      icona: '🖼️',
+      onConfirmar: async () => {
+        await api.eliminarAvatar();
+        store.usuari.avatar_url = null;
+        refrescarAvatars();
+        alertAvatar.innerHTML = '<div class="alert alert-ok">✓ Foto eliminada</div>';
+      }
+    });
   };
 
   // Desar nom
