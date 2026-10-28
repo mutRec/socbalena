@@ -1,6 +1,6 @@
 // views/immersio-detall.js
 import { api } from '../api.js';
-import { formatNotes } from '../format.js';
+import { escapeHtml, formatNotes, enllacXip } from '../format.js';
 import { obrirConfirmacio } from './confirm-modal.js';
 
 export async function renderImmersioDetall(el, id) {
@@ -38,8 +38,16 @@ export async function renderImmersioDetall(el, id) {
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:2rem;color:var(--color-cian);font-weight:700;">
               🤿 Immersió #${i.numero_immersio || '—'}
             </div>
-            <div style="font-size:1.1rem;margin:0.3rem 0;">${i.zona_nom || 'Sense zona assignada'}</div>
-            <div style="color:var(--color-gris);margin-bottom:0.5rem">${i.centre_nom || ''}</div>
+            <div style="font-size:1.1rem;margin:0.3rem 0;">
+              ${i.zona_id
+                ? `<a class="enllac" href="#/zona/${i.zona_id}" title="Veure la zona ${escapeHtml(i.zona_nom || '')}">${escapeHtml(i.zona_nom)}</a>`
+                : (i.zona_nom ? escapeHtml(i.zona_nom) : 'Sense zona assignada')}
+            </div>
+            <div style="margin-bottom:0.5rem">
+              ${i.centre_id && i.centre_nom
+                ? enllacXip(`#/centre/${i.centre_id}`, i.centre_nom, { icona: '🏢', petit: true, titol: `Veure el centre ${i.centre_nom}` })
+                : (i.centre_nom ? `<span style="color:var(--color-gris)">${escapeHtml(i.centre_nom)}</span>` : '')}
+            </div>
             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
               ${i.valoracio ? `<span class="estrelles">${'⭐'.repeat(i.valoracio)}</span>` : ''}
               ${i.tipus_immersio ? `<span class="badge badge-cian">${i.tipus_immersio}</span>` : ''}
@@ -264,9 +272,6 @@ function formatDataHora(d) {
 function labelVestit(v) {
   const m = { 'sec': 'Sec', 'semisec': 'Semisec', 'humit_5mm': 'Humit 5mm', 'humit_3mm': 'Humit 3mm', 'rashguard': 'Rashguard', 'altre': 'Altre' };
   return m[v] || v || '—';
-}
-function escapeHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function capitalitzar(text) {
   if (!text) return '—';

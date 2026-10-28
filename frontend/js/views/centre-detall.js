@@ -1,6 +1,6 @@
 // views/centre-detall.js
 import { api } from '../api.js';
-import { escapeHtml, formatNotes } from '../format.js';
+import { escapeHtml, formatNotes, enllacXip } from '../format.js';
 import { obrirModalCentre } from './centre-modal.js';
 import { obrirConfirmacio } from './confirm-modal.js';
 
@@ -22,15 +22,15 @@ export async function renderCentreDetall(el, id) {
       c.adreca ? { label: '📍 Adreça', html: escapeHtml(c.adreca) } : null,
       c.telefon ? {
         label: '📞 Telèfon',
-        html: `<a href="tel:${escapeHtml(c.telefon.replace(/[^\d+]/g, ''))}">${escapeHtml(c.telefon)}</a>`
+        html: enllacXip(`tel:${c.telefon.replace(/[^\d+]/g, '')}`, c.telefon)
       } : null,
       c.email ? {
         label: '✉️ Correu',
-        html: `<a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>`
+        html: enllacXip(`mailto:${c.email}`, c.email)
       } : null,
       web ? {
         label: '🌐 Web',
-        html: `<a href="${escapeHtml(web)}" target="_blank" rel="noopener noreferrer">${escapeHtml(c.web)}</a>`
+        html: enllacXip(web, c.web, { extern: true })
       } : null,
     ].filter(Boolean);
 

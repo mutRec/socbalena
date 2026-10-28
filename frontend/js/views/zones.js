@@ -1,6 +1,6 @@
 // views/zones.js
 import { api } from '../api.js';
-import { escapeHtml } from '../format.js';
+import { escapeHtml, enllacXip } from '../format.js';
 import { obrirModalZona } from './zone-modal.js';
 import { obrirConfirmacio } from './confirm-modal.js';
 
@@ -55,9 +55,7 @@ export async function renderZones(el) {
                   <td>${badgeTipus(z.tipus)}</td>
                   <td>${badgeNivell(z.nivell_dificultat)}</td>
                   <td>${z.profunditat_max ? z.profunditat_max + ' m' : '—'}</td>
-                  <td>${z.centres?.length
-                    ? z.centres.map(c => escapeHtml(c.nom)).join(', ')
-                    : '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td>${enllacosCentres(z)}</td>
                   <td style="color:var(--color-gris);font-size:0.875rem">${[z.regio, z.pais].filter(Boolean).map(escapeHtml).join(', ') || '—'}</td>
                   <td><span class="badge badge-gris">${z.num_immersions || 0}</span></td>
                   <td>
@@ -191,9 +189,7 @@ function reordenarIAplicar() {
       <td>${badgeTipus(z.tipus)}</td>
       <td>${badgeNivell(z.nivell_dificultat)}</td>
       <td>${z.profunditat_max ? z.profunditat_max + ' m' : '—'}</td>
-      <td>${z.centres?.length
-        ? z.centres.map(c => escapeHtml(c.nom)).join(', ')
-        : '<span style="color:var(--color-gris)">—</span>'}</td>
+      <td>${enllacosCentres(z)}</td>
       <td style="color:var(--color-gris);font-size:0.875rem">${[z.regio, z.pais].filter(Boolean).map(escapeHtml).join(', ') || '—'}</td>
       <td><span class="badge badge-gris">${z.num_immersions || 0}</span></td>
       <td>
@@ -216,6 +212,14 @@ function badgeTipus(t) {
   return `<span class="badge badge-gris">${t}</span>`;
 }
 
+// Centres associats a una zona, com a xips enllaçats a la fitxa del centre
+function enllacosCentres(z) {
+  if (!z.centres?.length) return '<span style="color:var(--color-gris)">—</span>';
+  return `<div class="enllacos-llista">${z.centres
+    .map(c => enllacXip(`#/centre/${c.id}`, c.nom, { icona: '🏢', petit: true }))
+    .join('')}</div>`;
+}
+
 function badgeNivell(n) {
   if (!n) return '<span style="color:var(--color-gris)">—</span>';
   const cls = { principiant:'badge-ok', intermedi:'badge-cian', avançat:'badge-warn', expert:'badge-perill' };
@@ -231,7 +235,9 @@ function targetaZona(z) {
         <span class="targeta-nom">${escapeHtml(z.nom)}</span>
         ${badgeTipus(z.tipus)}
       </div>
-      ${z.centres?.length ? `<div class="targeta-subtit">🏢 ${z.centres.map(c => escapeHtml(c.nom)).join(', ')}</div>` : ''}
+      ${z.centres?.length ? `<div class="enllacos-llista" style="margin-top:0.4rem">${z.centres
+        .map(c => enllacXip(`#/centre/${c.id}`, c.nom, { icona: '🏢', petit: true }))
+        .join('')}</div>` : ''}
       ${lloc ? `<div class="targeta-subtit">📍 ${escapeHtml(lloc)}</div>` : ''}
       <div class="targeta-meta">
         ${z.profunditat_max ? `<span class="targeta-chip">📏 ${z.profunditat_max} m</span>` : ''}

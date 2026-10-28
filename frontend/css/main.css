@@ -290,7 +290,10 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   margin-bottom: 0.2rem;
 }
 .detall-dada-valor { font-weight: 500; overflow-wrap: anywhere; }
-.detall-dada-valor a { color: var(--color-cian); text-decoration: underline; }
+.detall-dada-valor a { color: var(--color-cian); text-decoration: none; }
+/* Els xips mantenen el seu propi color de text */
+.detall-dada-valor a.enllac-xip { color: var(--color-blanc); }
+.detall-dada-valor a.enllac-xip:hover { color: var(--color-cian); }
 .detall-notes {
   padding: 1rem;
   background: var(--color-profund);
@@ -313,12 +316,18 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   gap: 0.75rem;
   padding: 0.75rem;
   background: var(--color-profund);
+  border: 1px solid transparent;
   border-radius: var(--r-sm);
   color: inherit;
   text-decoration: none;
   transition: var(--t);
 }
-.zona-centre-fila:hover { background: var(--color-superfic); }
+.zona-centre-fila:hover {
+  background: var(--color-superfic);
+  border-color: var(--color-cian-dim);
+  transform: translateX(3px);
+}
+.zona-centre-fila:focus-visible { outline: 2px solid var(--color-cian); outline-offset: 2px; }
 .zona-centre-nom { font-weight: 600; }
 .zona-centre-meta { font-size: 0.8rem; color: var(--color-gris); }
 
@@ -562,7 +571,8 @@ h3 { font-size: 1.2rem; font-weight: 500; }
   letter-spacing: 0.04em;
   margin: 1rem 0 0.4rem;
 }
-.notes-cos a { color: var(--color-cian); text-decoration: underline; }
+.notes-cos a { color: var(--color-cian); text-decoration: none; border-bottom: 1px solid transparent; transition: var(--t); }
+.notes-cos a:hover { border-bottom-color: currentColor; }
 
 /* Vista prèvia de les notes dins del modal d'edició */
 .notes-vista {
@@ -620,6 +630,94 @@ tr.clickable { cursor: pointer; }
 
 /* Valoració estrelles */
 .estrelles { color: var(--color-warn); letter-spacing: 2px; }
+
+/* ── Enllaços ──────────────────────────────────────────── */
+/* Enllaç de text amb subratllat animat (notes, descripcions, textos) */
+.enllac {
+  color: var(--color-cian);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: var(--t), background-size 220ms ease;
+}
+.enllac:hover, .enllac:focus-visible { background-size: 100% 1px; }
+.enllac-extern::after {
+  content: '↗';
+  font-size: 0.85em;
+  margin-left: 0.15em;
+  opacity: 0.75;
+}
+
+/* Contenidor d'enllaços en xip */
+.enllacos-llista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Xip enllaçat: centres, zones, webs, contactes... */
+.enllac-xip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.28rem 0.7rem;
+  background: var(--color-mitjà);
+  border: 1px solid var(--color-superfic);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--color-blanc);
+  text-decoration: none;
+  transition: var(--t);
+}
+.enllac-xip::after {
+  content: '→';
+  flex-shrink: 0;
+  font-size: 0.85em;
+  color: var(--color-cian);
+  opacity: 0.6;
+  transition: var(--t);
+}
+.enllac-xip-extern::after { content: '↗'; }
+.enllac-xip:hover, .enllac-xip:focus-visible {
+  background: var(--color-cian-glow);
+  border-color: var(--color-cian);
+  color: var(--color-cian);
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(0,229,208,0.18);
+  outline: none;
+}
+.enllac-xip:hover::after, .enllac-xip:focus-visible::after {
+  opacity: 1;
+  transform: translate(2px, 0);
+}
+.enllac-xip-icona { flex-shrink: 0; font-size: 0.95em; line-height: 1; }
+.enllac-xip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+/* Variant compacta per a taules */
+.enllac-xip-sm {
+  padding: 0.15rem 0.55rem;
+  font-size: 0.78rem;
+  gap: 0.3rem;
+}
+.enllac-xip-sm .enllac-xip-text { max-width: 240px; }
+/* Variant en columna (llistes dins de taules) */
+.enllacos-llista-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+/* Dins de les targetes, més discret */
+.targeta .enllac-xip { background: var(--color-profund); }
 
 /* Modal */
 .modal-overlay {

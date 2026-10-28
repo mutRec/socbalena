@@ -1,6 +1,6 @@
 // views/centres.js
 import { api } from '../api.js';
-import { escapeHtml } from '../format.js';
+import { escapeHtml, enllacXip } from '../format.js';
 import { obrirModalCentre } from './centre-modal.js';
 import { obrirConfirmacio } from './confirm-modal.js';
 
@@ -47,8 +47,8 @@ export async function renderCentres(el) {
                 <tr class="clickable" data-id="${c.id}" data-nom="${escapeHtml(c.nom).toLowerCase()}">
                   <td><strong>${escapeHtml(c.nom)}</strong>${c.logo_url ? `<img src="${escapeHtml(c.logo_url)}" alt="" style="width:28px;height:28px;vertical-align:middle;margin-left:0.5rem;border-radius:4px;" />` : ''}</td>
                   <td style="color:var(--color-gris);font-size:0.875rem">${[c.regio, c.pais].filter(Boolean).map(escapeHtml).join(', ') || '<span style="color:var(--color-gris)">—</span>'}</td>
-                  <td style="font-size:0.875rem">${[c.telefon ? '📞 '+escapeHtml(c.telefon) : '', c.email ? '✉️ '+escapeHtml(c.email) : ''].filter(Boolean).join('<br>') || '<span style="color:var(--color-gris)">—</span>'}</td>
-                  <td>${c.web ? `<a href="${escapeHtml(c.web)}" target="_blank" rel="noopener noreferrer" style="color:var(--color-cian);font-size:0.875rem">${escapeHtml(c.web)}</a>` : '<span style="color:var(--color-gris)">—</span>'}</td>
+                  <td>${enllacosContacte(c)}</td>
+                  <td>${c.web ? enllacXip(c.web, c.web, { extern: true, petit: true, titol: c.web }) : '<span style="color:var(--color-gris)">—</span>'}</td>
                   <td><span class="badge badge-cian">${c.num_zones || 0}</span></td>
                   <td>
                     <button class="btn btn-ghost btn-sm btn-editar" data-id="${c.id}">✏️</button>
@@ -136,6 +136,11 @@ export async function renderCentres(el) {
 
   function targetaCentre(c) {
     const lloc = [c.regio, c.pais].filter(Boolean).join(', ');
+    const contactes = [
+      c.telefon ? enllacXip(`tel:${c.telefon.replace(/[^\d+]/g, '')}`, c.telefon, { icona: '📞', petit: true, titol: c.telefon }) : '',
+      c.email ? enllacXip(`mailto:${c.email}`, c.email, { icona: '✉️', petit: true, titol: c.email }) : '',
+      c.web ? enllacXip(c.web, c.web, { icona: '🌐', extern: true, petit: true, titol: c.web }) : ''
+    ].filter(Boolean).join('');
     return `
       <article class="targeta" data-id="${c.id}" role="link" tabindex="0"
                aria-label="Veure el centre ${escapeHtml(c.nom)}">
@@ -143,9 +148,7 @@ export async function renderCentres(el) {
           <span class="targeta-nom">${escapeHtml(c.nom)}</span>
         </div>
         ${lloc ? `<div class="targeta-subtit">📍 ${escapeHtml(lloc)}</div>` : ''}
-        ${c.telefon ? `<div class="targeta-subtit">📞 ${escapeHtml(c.telefon)}</div>` : ''}
-        ${c.email ? `<div class="targeta-subtit">✉️ ${escapeHtml(c.email)}</div>` : ''}
-        ${c.web ? `<div class="targeta-subtit"><a href="${escapeHtml(c.web)}" target="_blank" rel="noopener" style="color:var(--color-cian)">${escapeHtml(c.web)}</a></div>` : ''}
+        ${contactes ? `<div class="enllacos-llista" style="margin-top:0.4rem">${contactes}</div>` : ''}
         <div class="targeta-meta">
           <span class="badge badge-cian">${c.num_zones || 0} zones</span>
         </div>
@@ -157,6 +160,18 @@ export async function renderCentres(el) {
           </div>
         </div>
       </article>`;
+  }
+
+  // Contactes del centre com a xips enllaçats (telèfon i correu)
+  function enllacosContacte(c) {
+    const items = [
+      c.telefon ? enllacXip(`tel:${c.telefon.replace(/[^\d+]/g, '')}`, c.telefon, { icona: '📞', petit: true, titol: c.telefon }) : '',
+      c.email ? enllacXip(`mailto:${c.email}`, c.email, { icona: '✉️', petit: true, titol: c.email }) : ''
+    ].filter(Boolean);
+
+    return items.length
+      ? `<div class="enllacos-llista enllacos-llista-vertical">${items.join('')}</div>`
+      : '<span style="color:var(--color-gris)">—</span>';
   }
 
   await renderLlista();

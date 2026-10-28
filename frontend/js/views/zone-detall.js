@@ -1,6 +1,6 @@
 // views/zone-detall.js
 import { api } from '../api.js';
-import { escapeHtml, formatNotes } from '../format.js';
+import { escapeHtml, formatNotes, enllacXip } from '../format.js';
 import { obrirModalZona } from './zone-modal.js';
 import { obrirConfirmacio } from './confirm-modal.js';
 
@@ -36,7 +36,9 @@ export async function renderZoneDetall(el, id) {
       {
         label: '🏢 Centres',
         html: centres.length
-          ? centres.map(c => `<a href="#/centre/${c.id}">${escapeHtml(c.nom)}</a>`).join('<br>')
+          ? `<div class="enllacos-llista">${centres
+              .map(c => enllacXip(`#/centre/${c.id}`, c.nom, { icona: '🏢' }))
+              .join('')}</div>`
           : '<span style="color:var(--color-gris)">Sense centre associat</span>'
       },
     ].filter(Boolean);

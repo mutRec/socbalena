@@ -45,6 +45,15 @@
   #fitxa .notes-cos a { color: #003366 !important; }
   #fitxa .notes-cos code { background: #e7eef5 !important; color: #111 !important; }
 
+  /* Enllaços (zona, centre...) llegibles en paper */
+  #fitxa a, #fitxa .enllac, #fitxa .enllac-xip {
+    color: #003366 !important;
+    background: none !important;
+    box-shadow: none !important;
+    border-color: #9bb8d0 !important;
+  }
+  #fitxa .enllac-extern::after, #fitxa .enllac-xip::after { color: #003366 !important; opacity: 0.8 !important; }
+
   /* Grid de paràmetres en blanc */
   #fitxa [style*="background:var(--color-profund)"] {
     background: #f5f8fb !important;
